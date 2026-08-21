@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--fg-rgb:232,217,168;--gold-rgb:212,175,55;--bg-rgb:11,29,58;--ink:#D4AF37;--fg:#E8D9A8;--bg:#0B1D3A;--canvas:#08152B;--btn-bg:#D4AF37;--btn-fg:#0B1D3A;--accent:#D4AF37;--danger:#E4A08C;--sheet:rgba(15,37,71,0.92);--scrim:rgba(8,21,43,0.88);--scrim-soft:rgba(8,21,43,0.6);--alert:rgba(240,240,240,0.14);--alert-fg:#fff;--alert-sub:rgba(255,255,255,0.78);--alert-line:rgba(255,255,255,0.18)}
+@media (prefers-color-scheme: light){:root{--fg-rgb:11,29,58;--gold-rgb:168,134,28;--bg-rgb:239,233,216;--ink:#0B1D3A;--fg:#0B1D3A;--bg:#EFE9D8;--canvas:#DED5BD;--btn-bg:#0B1D3A;--btn-fg:#EFE9D8;--accent:#A8861C;--danger:#9E3A1C;--sheet:rgba(243,238,224,0.94);--scrim:rgba(239,233,216,0.92);--scrim-soft:rgba(28,45,74,0.32);--alert:rgba(255,255,255,0.72);--alert-fg:#0B1D3A;--alert-sub:rgba(11,29,58,0.6);--alert-line:rgba(11,29,58,0.14)}}
+[data-theme="dark"]{--fg-rgb:232,217,168;--gold-rgb:212,175,55;--bg-rgb:11,29,58;--ink:#D4AF37;--fg:#E8D9A8;--bg:#0B1D3A;--canvas:#08152B;--btn-bg:#D4AF37;--btn-fg:#0B1D3A;--accent:#D4AF37;--danger:#E4A08C;--sheet:rgba(15,37,71,0.92);--scrim:rgba(8,21,43,0.88);--scrim-soft:rgba(8,21,43,0.6);--alert:rgba(240,240,240,0.14);--alert-fg:#fff;--alert-sub:rgba(255,255,255,0.78);--alert-line:rgba(255,255,255,0.18)}
+[data-theme="light"]{--fg-rgb:11,29,58;--gold-rgb:168,134,28;--bg-rgb:239,233,216;--ink:#0B1D3A;--fg:#0B1D3A;--bg:#EFE9D8;--canvas:#DED5BD;--btn-bg:#0B1D3A;--btn-fg:#EFE9D8;--accent:#A8861C;--danger:#9E3A1C;--sheet:rgba(243,238,224,0.94);--scrim:rgba(239,233,216,0.92);--scrim-soft:rgba(28,45,74,0.32);--alert:rgba(255,255,255,0.72);--alert-fg:#0B1D3A;--alert-sub:rgba(11,29,58,0.6);--alert-line:rgba(11,29,58,0.14)}
+[data-platform]{}
+:root,[data-theme]{--glass:blur(22px);--pt1:76px;--pt2:70px;--pt3:58px;--chrome:rgba(var(--bg-rgb),0.78)}
+[data-platform="android"]{--glass:none;--pt1:26px;--pt2:22px;--pt3:14px;--chrome:var(--bg);--sheet:var(--bg)}
+</style>
+<style>
+body{margin:0;background:var(--canvas);color:var(--fg);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--ink);text-decoration:none}a:hover{color:var(--fg)}
+@keyframes enBreathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.06);opacity:.45}}
+@keyframes enRise{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes enShimmer{0%{opacity:.25}50%{opacity:.7}100%{opacity:.25}}
+::-webkit-scrollbar{width:0;height:0}
+</style>
+</helmet>
+
+<div data-theme="{{ themeAttr }}" style="display:flex;gap:64px;align-items:flex-start;padding:56px 64px 90px;min-height:100vh;box-sizing:border-box">
+
+  <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:26px">
+    <div style="display:flex;align-items:center;gap:11px">
+      <div style="width:24px;height:24px;transform:rotate(45deg);border:1.5px solid var(--ink);border-radius:5px"></div>
+      <div style="font-family:Fraunces,serif;font-size:22px;font-weight:600;color:var(--ink);letter-spacing:-0.01em">Enigo</div>
+      <div style="margin-left:auto;font-size:10.5px;letter-spacing:0.14em;color:rgba(var(--fg-rgb),0.4)">iOS + ANDROID · AUTO · v4</div>
+    </div>
+
+    <div style="font-family:Fraunces,serif;font-size:29px;line-height:1.15;font-weight:500;color:var(--fg);letter-spacing:-0.02em;text-wrap:pretty">A mystery worth waiting for — end to end, tappable.</div>
+
+    <div style="font-size:13px;line-height:1.65;color:rgba(var(--fg-rgb),0.6)">Every screen from your brief in one prototype: onboarding through the eleven questions, the match, and a chat where unlocks actually fire. The palette follows the system — gold-on-navy in the dark, navy-on-ivory in daylight.</div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:rgba(var(--gold-rgb),0.08);border:1px solid rgba(var(--gold-rgb),0.22);font-size:12px;line-height:1.5;color:var(--fg)">
+        <div style="flex:1">{{ liveStatus }}</div>
+        <div onClick="{{ resetDemo }}" style="cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid rgba(var(--fg-rgb),0.2);font-size:11px;white-space:nowrap">Reset</div>
+      </div>
+      <sc-for list="{{ switches }}" as="sw" hint-placeholder-count="2">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:64px;flex:none;font-size:10px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.38)">{{ sw.title }}</div>
+          <div style="flex:1;display:flex;gap:6px;padding:4px;border-radius:12px;background:rgba(var(--fg-rgb),0.05);border:1px solid rgba(var(--fg-rgb),0.1)">
+            <sc-for list="{{ sw.options }}" as="o" hint-placeholder-count="3">
+              <div onClick="{{ o.pick }}" style="cursor:pointer;flex:1;padding:8px 6px;border-radius:9px;text-align:center;font-size:11.5px;background:{{ o.bg }};color:{{ o.color }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="font-size:10px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.38)">{{ g.title }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="6">
+              <div onClick="{{ it.go }}" style="cursor:pointer;padding:6.5px 11px;border-radius:999px;border:1px solid {{ it.border }};background:{{ it.bg }};font-size:11.5px;color:{{ it.color }}" style-hover="border-color:var(--ink)">{{ it.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="border-top:1px solid rgba(var(--fg-rgb),0.12);padding-top:18px;display:flex;flex-direction:column;gap:9px;font-size:12px;line-height:1.6;color:rgba(var(--fg-rgb),0.45)">
+      <div style="font-size:10px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.38)">TRY THE MECHANIC</div>
+      <div>Open <strong style="color:var(--fg);font-weight:500">Chat</strong> and send a few messages. Each unlock needs both people past a hidden bar — Wren replies on her own, so the reveal lands when she has shown up too, not when you have.</div>
+      <div style="height:1px;background:rgba(var(--fg-rgb),0.1);margin:4px 0"></div>
+      <div style="font-size:10px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.38)">STILL OPEN</div>
+      <div>· Real photography and illustration for the four intro slides<br>· Android Material 3 pass — tonal surfaces, no glass<br>· ToS / privacy, referral mechanic</div>
+    </div>
+  </div>
+
+  <div style="flex:none">
+  <x-import component-from-global-scope="{{ frameName }}" from="./ios-frame.jsx ./android-frame.jsx" dark="{{ isDark }}" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,sans-serif;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-120px;left:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(var(--gold-rgb),0.16),transparent 68%);pointer-events:none"></div>
+
+      <div style="flex:1;overflow-y:auto;overflow-x:hidden;position:relative">
+
+        <sc-if value="{{ isIntro }}" hint-placeholder-val="{{ yes }}">
+          <div style="min-height:100%;box-sizing:border-box;padding:var(--pt1) 28px 34px;display:flex;flex-direction:column">
+            <div style="flex:none;height:210px;border-radius:20px;border:1px solid rgba(var(--fg-rgb),0.14);background:rgba(var(--fg-rgb),0.05);background-image:repeating-linear-gradient(135deg,rgba(var(--fg-rgb),0.06) 0 9px,transparent 9px 18px);display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.35)">{{ slide.art }}</div>
+            <div style="margin-top:38px;font-family:Fraunces,serif;font-size:33px;line-height:1.12;font-weight:600;color:var(--ink);letter-spacing:-0.025em;text-wrap:pretty">{{ slide.title }}</div>
+            <div style="margin-top:16px;font-size:15.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.66);text-wrap:pretty">{{ slide.body }}</div>
+            <div style="flex:1"></div>
+            <div style="display:flex;gap:7px;justify-content:center;margin-bottom:22px">
+              <sc-for list="{{ slideDots }}" as="d" hint-placeholder-count="4">
+                <div onClick="{{ d.go }}" style="cursor:pointer;width:{{ d.w }};height:6px;border-radius:99px;background:{{ d.bg }}"></div>
+              </sc-for>
+            </div>
+            <div onClick="{{ slide.next }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">{{ slide.cta }}</div>
+            <div onClick="{{ goPhone }}" style="cursor:pointer;text-align:center;margin-top:14px;font-size:13.5px;color:rgba(var(--fg-rgb),0.5)">I already have an account</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPhone }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:22px;min-height:100%;box-sizing:border-box">
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">What's your number?</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.6)">It signs you in, and it confirms you're over 18. Nobody you match with ever sees it.</div>
+            <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
+              <div style="padding:16px 14px;border-radius:14px;background:rgba(var(--fg-rgb),0.07);border:1px solid rgba(var(--fg-rgb),0.14);font-size:16px">+46</div>
+              <div style="flex:1;padding:16px;border-radius:14px;background:rgba(var(--fg-rgb),0.07);border:1px solid rgba(var(--gold-rgb),0.45);font-size:16px;letter-spacing:0.02em">70 418 22 09<span style="color:var(--ink);animation:enShimmer 1.2s ease-in-out infinite">|</span></div>
+            </div>
+            <div style="font-size:12px;line-height:1.6;color:rgba(var(--fg-rgb),0.4)">By continuing you agree to the Terms and Privacy Policy.</div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goVerify }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Send code</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isVerify }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:22px;min-height:100%;box-sizing:border-box">
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Six digits, then you're in</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.6)">Sent to +46 70 418 22 09.</div>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <sc-for list="{{ codeBoxes }}" as="c" hint-placeholder-count="6">
+                <div style="flex:1;aspect-ratio:1/1.15;border-radius:12px;background:rgba(var(--fg-rgb),0.07);border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:24px;color:var(--fg)">{{ c.d }}</div>
+              </sc-for>
+            </div>
+            <div style="font-size:13px;color:rgba(var(--fg-rgb),0.45)">Resend in 0:24</div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goPhoto }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Confirm</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPhoto }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">STEP 1 OF 3 · YOUR PROFILE</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Add a photo nobody sees yet</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">It stays sealed until you and your match have both shown up long enough. That moment is the point.</div>
+            <div onClick="{{ pickPhoto }}" style="cursor:pointer;align-self:center;width:196px;height:196px;border-radius:22px;border:1px dashed rgba(var(--gold-rgb),0.5);background:rgba(var(--fg-rgb),0.05);background-image:repeating-linear-gradient(135deg,rgba(var(--fg-rgb),0.07) 0 9px,transparent 9px 18px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-top:8px">
+              <div style="width:34px;height:34px;border-radius:50%;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:19px">{{ photoGlyph }}</div>
+              <div style="font-size:11px;letter-spacing:0.14em;color:rgba(var(--fg-rgb),0.45);text-align:center;padding:0 14px;line-height:1.5">{{ photoLabel }}</div>
+            </div>
+            <input type="file" accept="image/*" ref="{{ fileRef }}" onChange="{{ onPhoto }}" style="display:none" />
+            <div style="display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:14px;background:rgba(var(--gold-rgb),0.09);border:1px solid rgba(var(--gold-rgb),0.22);font-size:12.5px;line-height:1.5;color:var(--fg)">
+              <div style="width:7px;height:7px;transform:rotate(45deg);background:var(--accent);flex:none"></div>Hidden until graduation. Always.
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goInterests }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Continue</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isInterests }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">STEP 2 OF 3 · YOUR PROFILE</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">What pulls you in?</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">Pick at least three — more if you like. These unlock first, so they're the first real thing your match learns about you.</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:rgba(var(--fg-rgb),0.45)"><span>{{ interestCount }} chosen</span><span>Scroll for more</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ interestChips }}" as="c" hint-placeholder-count="16">
+                <div onClick="{{ c.toggle }}" style="cursor:pointer;padding:10px 14px;border-radius:14px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-family:Fraunces,serif;font-size:14.5px">{{ c.label }}</div>
+              </sc-for>
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goBio }}" style="cursor:pointer;padding:16px;border-radius:14px;background:{{ interestsReadyBg }};color:{{ interestsReadyFg }};font-size:16px;font-weight:600;text-align:center">{{ interestsCta }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isBio }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">STEP 3 OF 3 · YOUR PROFILE</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Say something true</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">The only place in Enigo where you write freely about yourself. Two sentences is plenty.</div>
+            <div style="padding:16px;border-radius:16px;background:rgba(var(--fg-rgb),0.07);border:1px solid rgba(var(--gold-rgb),0.4);min-height:130px;font-family:Fraunces,serif;font-size:16px;line-height:1.55;color:var(--fg)">I make bread badly and maps carefully. Most weekends I'm walking somewhere I've already been, noticing new things.<span style="color:var(--ink);animation:enShimmer 1.2s ease-in-out infinite">|</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(var(--fg-rgb),0.4)"><span>Unlocks after your interests do</span><span>142 / 240</span></div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goGender }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Continue</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isGender }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">IDENTITY &amp; SAFETY</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">How do you describe yourself?</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ genderOpts }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.pick }}" style="cursor:pointer;padding:16px;border-radius:14px;border:1px solid {{ o.border }};background:{{ o.bg }};font-family:Fraunces,serif;font-size:17px;color:{{ o.color }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ genderSelf }}">
+              <div style="padding:15px;border-radius:14px;background:rgba(var(--fg-rgb),0.07);border:1px solid rgba(var(--gold-rgb),0.4);font-family:Fraunces,serif;font-size:16px;color:rgba(var(--fg-rgb),0.5)">In your words…<span style="color:var(--ink);animation:enShimmer 1.2s ease-in-out infinite">|</span></div>
+            </sc-if>
+            <div style="flex:1"></div>
+            <div onClick="{{ goPrefMatch }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Continue</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPrefMatch }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">IDENTITY &amp; SAFETY · 1 OF 3</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Who would you like to be matched with?</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ matchWith }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.toggle }}" style="cursor:pointer;display:flex;align-items:center;gap:13px;padding:16px;border-radius:14px;border:1px solid {{ o.border }};background:{{ o.bg }}">
+                  <div style="width:9px;height:9px;transform:rotate(45deg);background:{{ o.dot }};flex:none"></div>
+                  <div style="font-family:Fraunces,serif;font-size:17px;color:{{ o.color }}">{{ o.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goPrefShown }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Continue</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPrefShown }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">IDENTITY &amp; SAFETY · 2 OF 3</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Who would you like to be shown to?</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">Both answers have to agree before a match can happen — yours and theirs.</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ shownTo }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.toggle }}" style="cursor:pointer;display:flex;align-items:center;gap:13px;padding:16px;border-radius:14px;border:1px solid {{ o.border }};background:{{ o.bg }}">
+                  <div style="width:9px;height:9px;transform:rotate(45deg);background:{{ o.dot }};flex:none"></div>
+                  <div style="font-family:Fraunces,serif;font-size:17px;color:{{ o.color }}">{{ o.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goCommunity }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Continue</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isCommunity }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">IDENTITY &amp; SAFETY · 3 OF 3</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Is Enigo an LGBTQ+ space for you?</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">Some people are here to meet inside the community. Some don't mind either way. Answering is optional — it shapes who we look for, and it's never shown to anyone.</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ communityOpts }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.pick }}" style="cursor:pointer;padding:16px;border-radius:14px;border:1px solid {{ o.border }};background:{{ o.bg }};font-family:Fraunces,serif;font-size:17px;line-height:1.32;color:{{ o.color }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+            <div style="padding:14px;border-radius:14px;background:rgba(var(--gold-rgb),0.08);border:1px solid rgba(var(--gold-rgb),0.22);font-size:12.5px;line-height:1.6;color:var(--fg)">{{ communityNote }}</div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goPlace }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">{{ communityCta }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPlace }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">WHERE TO LOOK</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Who's near you?</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">We sort your matches by distance — the closest good one first. Your area stays sealed until it unlocks for them, and it's never an address.</div>
+            <div onClick="{{ grantLocation }}" style="cursor:pointer;display:flex;align-items:center;gap:13px;padding:16px;border-radius:16px;background:{{ locBg }};border:1px solid {{ locBorder }}">
+              <div style="width:9px;height:9px;transform:rotate(45deg);background:{{ locDot }};flex:none"></div>
+              <div style="flex:1">
+                <div style="font-family:Fraunces,serif;font-size:17px;color:var(--fg)">{{ locTitle }}</div>
+                <div style="font-size:12.5px;color:rgba(var(--fg-rgb),0.5);margin-top:3px">{{ locNote }}</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="font-size:10.5px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">HOW FAR IS TOO FAR?</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ radiusChips }}" as="c" hint-placeholder-count="4">
+                  <div onClick="{{ c.pick }}" style="cursor:pointer;padding:11px 16px;border-radius:14px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-family:Fraunces,serif;font-size:15px">{{ c.label }}</div>
+                </sc-for>
+              </div>
+              <div style="font-size:12px;line-height:1.6;color:rgba(var(--fg-rgb),0.42);margin-top:2px">{{ radiusNote }}</div>
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goIntent }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Continue</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isIntent }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">What are you hoping to find here?</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">No wrong answer, and you can change it later.</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ intentOpts }}" as="o" hint-placeholder-count="3">
+                <div onClick="{{ o.pick }}" style="cursor:pointer;padding:18px;border-radius:14px;border:1px solid {{ o.border }};background:{{ o.bg }};font-family:Fraunces,serif;font-size:17.5px;line-height:1.3;color:{{ o.color }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goQuiz }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Continue</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isQuiz }}">
+          <div style="padding:var(--pt2) 28px 34px;display:flex;flex-direction:column;gap:22px;min-height:100%;box-sizing:border-box">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div onClick="{{ quizBack }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+              <div style="flex:1;display:flex;gap:4px">
+                <sc-for list="{{ quizTicks }}" as="t" hint-placeholder-count="11">
+                  <div style="flex:1;height:3px;border-radius:99px;background:{{ t.bg }}"></div>
+                </sc-for>
+              </div>
+              <div style="font-size:11.5px;color:rgba(var(--fg-rgb),0.45)">{{ quizLabel }}</div>
+            </div>
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">{{ q.category }}</div>
+            <div style="font-family:Fraunces,serif;font-size:28px;line-height:1.18;font-weight:600;color:var(--ink);letter-spacing:-0.02em;text-wrap:pretty">{{ q.text }}</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ quizOpts }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.pick }}" style="cursor:pointer;padding:16px;border-radius:14px;border:1px solid {{ o.border }};background:{{ o.bg }};font-family:Fraunces,serif;font-size:17px;line-height:1.32;color:{{ o.color }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+            <div style="flex:1"></div>
+            <div style="text-align:center;font-size:12.5px;color:rgba(var(--fg-rgb),0.38)">Tap an answer to go on. No typing anywhere in here.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isNotif }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Two things worth interrupting you</div>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-top:2px">
+              <div style="display:flex;gap:13px;align-items:flex-start;padding:16px;border-radius:16px;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.12)">
+                <div style="width:9px;height:9px;transform:rotate(45deg);background:var(--accent);margin-top:5px;flex:none"></div>
+                <div><div style="font-family:Fraunces,serif;font-size:17px">A new message</div><div style="font-size:13px;color:rgba(var(--fg-rgb),0.55);margin-top:3px">Only from the person you're matched with.</div></div>
+              </div>
+              <div style="display:flex;gap:13px;align-items:flex-start;padding:16px;border-radius:16px;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.12)">
+                <div style="width:9px;height:9px;transform:rotate(45deg);background:var(--accent);margin-top:5px;flex:none"></div>
+                <div><div style="font-family:Fraunces,serif;font-size:17px">Something unlocked</div><div style="font-size:13px;color:rgba(var(--fg-rgb),0.55);margin-top:3px">The moments you'd hate to miss.</div></div>
+              </div>
+            </div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(var(--fg-rgb),0.45)">Never streaks, never nudges to come back, never "someone's waiting".</div>
+            <sc-if value="{{ isAndroid }}">
+              <div style="margin-top:6px;border-radius:28px;background:rgba(var(--fg-rgb),0.08);border:1px solid rgba(var(--fg-rgb),0.1);padding:24px">
+                <div style="font-family:Fraunces,serif;font-size:22px;line-height:1.25;color:var(--ink)">Allow Enigo to send you notifications?</div>
+                <div style="font-size:13.5px;line-height:1.5;color:rgba(var(--fg-rgb),0.6);margin-top:10px">New messages and unlock moments only.</div>
+                <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:22px">
+                  <div style="cursor:pointer;padding:11px 18px;border-radius:99px;font-size:14px;font-weight:600;color:rgba(var(--fg-rgb),0.6)">Don't allow</div>
+                  <div onClick="{{ goSearching }}" style="cursor:pointer;padding:11px 20px;border-radius:99px;background:var(--btn-bg);color:var(--btn-fg);font-size:14px;font-weight:600">Allow</div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isIOS }}" hint-placeholder-val="{{ yes }}">
+            <div style="margin-top:6px;border-radius:18px;overflow:hidden;background:var(--alert);border:1px solid rgba(var(--fg-rgb),0.14);backdrop-filter:var(--glass)">
+              <div style="padding:18px 18px 16px;text-align:center">
+                <div style="font-size:15px;font-weight:600;color:var(--alert-fg)">"Enigo" Would Like to Send You Notifications</div>
+                <div style="font-size:12.5px;line-height:1.45;color:var(--alert-sub);margin-top:6px">Notifications may include alerts and sounds.</div>
+              </div>
+              <div style="display:flex;border-top:1px solid var(--alert-line)">
+                <div style="flex:1;padding:13px;text-align:center;font-size:15px;color:var(--alert-sub);border-right:1px solid var(--alert-line)">Don't Allow</div>
+                <div onClick="{{ goSearching }}" style="cursor:pointer;flex:1;padding:13px;text-align:center;font-size:15px;font-weight:600;color:var(--alert-fg)">Allow</div>
+              </div>
+            </div>
+            </sc-if>
+            <div style="flex:1"></div>
+            <div onClick="{{ goSearching }}" style="cursor:pointer;text-align:center;font-size:13.5px;color:rgba(var(--fg-rgb),0.5)">Maybe later</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSearching }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;min-height:100%;box-sizing:border-box;text-align:center">
+            <div style="position:relative;width:170px;height:170px;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(var(--gold-rgb),0.35);animation:enBreathe 3.6s ease-in-out infinite"></div>
+              <div style="position:absolute;inset:26px;border-radius:50%;border:1px solid rgba(var(--gold-rgb),0.22);animation:enBreathe 3.6s ease-in-out infinite 0.5s"></div>
+              <div style="width:14px;height:14px;transform:rotate(45deg);background:var(--accent)"></div>
+            </div>
+            <div style="font-family:Fraunces,serif;font-size:29px;line-height:1.16;font-weight:600;color:var(--ink);letter-spacing:-0.02em">Looking for one good match</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.6);max-width:280px">{{ searchingNote }}</div>
+            <div onClick="{{ goMatch }}" style="cursor:pointer;margin-top:8px;padding:14px 22px;border-radius:14px;border:1px solid rgba(var(--gold-rgb),0.45);font-size:14.5px;color:var(--fg)">Skip ahead (prototype)</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isMatch }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;min-height:100%;box-sizing:border-box;animation:enRise 0.5s ease both">
+            <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">YOUR MATCH</div>
+            <div style="margin-top:26px;align-self:center;position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(var(--gold-rgb),0.3)"></div>
+              <div style="width:104px;height:104px;border-radius:50%;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.14);background-image:repeating-linear-gradient(135deg,rgba(var(--fg-rgb),0.08) 0 8px,transparent 8px 16px);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:31px;color:var(--ink)">W</div>
+            </div>
+            <div style="margin-top:26px;text-align:center;font-family:Fraunces,serif;font-size:34px;font-weight:600;color:var(--ink);letter-spacing:-0.02em">@wrenandfog</div>
+            <div style="margin-top:10px;text-align:center;font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.6)">That's everything you get for now. No photo, no name, no city.</div>
+            <div style="margin-top:24px;padding:17px;border-radius:16px;background:rgba(var(--gold-rgb),0.09);border:1px solid rgba(var(--gold-rgb),0.22)">
+              <div style="font-size:10.5px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.5)">WHY YOU TWO</div>
+              <div style="margin-top:9px;font-family:Fraunces,serif;font-size:17.5px;line-height:1.4;color:var(--fg)">You both said the fastest way to fix a misunderstanding is to ask, not assume — and neither of you minds waiting.</div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(var(--gold-rgb),0.2);font-size:12.5px;line-height:1.55;color:rgba(var(--fg-rgb),0.6)">She's the closest strong match inside your {{ radius }}. Where she is stays sealed until it unlocks.</div>
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goChat }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Start the conversation</div>
+            <div onClick="{{ goDecline }}" style="cursor:pointer;text-align:center;margin-top:15px;font-size:13.5px;color:rgba(var(--fg-rgb),0.5)">Not right now</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isChat }}">
+          <div style="min-height:100%;box-sizing:border-box;display:flex;flex-direction:column">
+            <div style="position:sticky;top:0;z-index:5;padding:var(--pt3) 18px 12px;background:var(--chrome);backdrop-filter:var(--glass);border-bottom:1px solid rgba(var(--fg-rgb),0.1)">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div onClick="{{ goDash }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-family:Fraunces,serif;font-size:19px;font-weight:600;color:var(--ink)">@wrenandfog</div>
+                  <div style="font-size:11.5px;color:rgba(var(--fg-rgb),0.5);margin-top:2px">{{ threadCount }} messages between you</div>
+                </div>
+                <div onClick="{{ openSheet }}" style="cursor:pointer;padding:8px 12px;border-radius:12px;border:1px solid rgba(var(--fg-rgb),0.18);font-size:11.5px;color:var(--fg)">Known</div>
+              </div>
+            </div>
+
+            <div style="padding:18px 18px 14px;display:flex;flex-direction:column;gap:10px">
+              <div style="align-self:center;padding:8px 14px;border-radius:12px;background:rgba(var(--fg-rgb),0.05);border:1px solid rgba(var(--fg-rgb),0.1);font-size:11.5px;color:rgba(var(--fg-rgb),0.5);text-align:center;line-height:1.5;max-width:270px">You know each other's usernames. Everything else arrives in its own time.</div>
+              <sc-for list="{{ messages }}" as="m" hint-placeholder-count="4">
+                <div style="align-self:{{ m.align }};max-width:78%;padding:12px 15px;border-radius:16px;background:{{ m.bg }};border:1px solid {{ m.border }};color:{{ m.color }};font-size:15px;line-height:1.5">{{ m.text }}</div>
+              </sc-for>
+              <sc-if value="{{ typing }}">
+                <div style="align-self:flex-start;padding:12px 16px;border-radius:16px;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.12);display:flex;gap:5px">
+                  <div style="width:6px;height:6px;border-radius:50%;background:rgba(var(--gold-rgb),0.8);animation:enBreathe 1.1s ease-in-out infinite"></div>
+                  <div style="width:6px;height:6px;border-radius:50%;background:rgba(var(--gold-rgb),0.8);animation:enBreathe 1.1s ease-in-out infinite 0.2s"></div>
+                  <div style="width:6px;height:6px;border-radius:50%;background:rgba(var(--gold-rgb),0.8);animation:enBreathe 1.1s ease-in-out infinite 0.4s"></div>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="flex:1"></div>
+            <div style="position:sticky;bottom:0;padding:12px 16px 16px;background:var(--chrome);backdrop-filter:var(--glass);border-top:1px solid rgba(var(--fg-rgb),0.1);display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;align-items:flex-end;gap:9px">
+                <input type="text" value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}" placeholder="Say something true" style="flex:1;min-width:0;padding:13px 15px;border-radius:16px;background:rgba(var(--fg-rgb),0.07);border:1px solid rgba(var(--fg-rgb),0.14);font-size:14.5px;line-height:1.45;color:var(--fg);font-family:Inter,system-ui,sans-serif;outline:none" />
+                <div onClick="{{ send }}" style="cursor:pointer;width:46px;height:46px;flex:none;border-radius:14px;background:{{ sendBg }};color:var(--btn-fg);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600">{{ sendGlyph }}</div>
+              </div>
+              <sc-if value="{{ aiError }}">
+                <div style="font-size:11.5px;line-height:1.5;color:var(--danger);text-align:center">{{ aiError }}</div>
+              </sc-if>
+              <div onClick="{{ flagMsg }}" style="cursor:pointer;font-size:11.5px;color:rgba(var(--fg-rgb),0.38);text-align:center">Long-press a message to flag it</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDecline }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div onClick="{{ goChat }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">This isn't quite it</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">We'll close the conversation and start looking again. They won't be told you left — no notification, no last-seen.</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
+              <div style="font-size:10.5px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.4)">ANYTHING YOU WANT TO TELL US? OPTIONAL</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ declineChips }}" as="c" hint-placeholder-count="5">
+                  <div onClick="{{ c.toggle }}" style="cursor:pointer;padding:10px 14px;border-radius:14px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-family:Fraunces,serif;font-size:14.5px">{{ c.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="padding:15px;border-radius:14px;background:rgba(var(--fg-rgb),0.05);border:1px solid rgba(var(--fg-rgb),0.1);font-size:12.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.5)">{{ declineQuota }}</div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goSearching }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">End this match</div>
+            <div onClick="{{ goChat }}" style="cursor:pointer;text-align:center;margin-top:14px;font-size:13.5px;color:rgba(var(--fg-rgb),0.5)">Keep talking</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isReport }}">
+          <div style="padding:var(--pt1) 28px 34px;display:flex;flex-direction:column;gap:18px;min-height:100%;box-sizing:border-box">
+            <div onClick="{{ goChat }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+            <div style="font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Report @wrenandfog</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">A human reads every report. What happened?</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ reportOpts }}" as="o" hint-placeholder-count="5">
+                <div onClick="{{ o.pick }}" style="cursor:pointer;display:flex;align-items:center;gap:13px;padding:15px;border-radius:14px;border:1px solid {{ o.border }};background:{{ o.bg }}">
+                  <div style="width:9px;height:9px;transform:rotate(45deg);background:{{ o.dot }};flex:none"></div>
+                  <div style="font-family:Fraunces,serif;font-size:16.5px;color:{{ o.color }}">{{ o.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding:15px;border-radius:14px;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.12);font-size:14px;color:rgba(var(--fg-rgb),0.4);min-height:56px">Add detail if you want to (optional)</div>
+            <div style="padding:14px;border-radius:14px;background:rgba(var(--gold-rgb),0.08);border:1px solid rgba(var(--gold-rgb),0.22);font-size:12.5px;line-height:1.6;color:var(--fg)">Reporting ends this match right away, and the two of you won't be matched again.</div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goSearching }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Send report &amp; end match</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDash }}">
+          <div style="padding:var(--pt2) 22px 30px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="flex:1">
+                <div style="font-family:Fraunces,serif;font-size:29px;font-weight:600;color:var(--ink);letter-spacing:-0.02em">Your connections</div>
+                <div style="font-size:12.5px;color:rgba(var(--fg-rgb),0.5);margin-top:3px">Closest first · three at once with Pro</div>
+              </div>
+              <div onClick="{{ goProfile }}" style="cursor:pointer;width:38px;height:38px;border-radius:50%;background:rgba(var(--fg-rgb),0.07);border:1px solid rgba(var(--fg-rgb),0.14);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:15px;color:var(--ink)">S</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ connections }}" as="c" hint-placeholder-count="3">
+                <div onClick="{{ c.open }}" style="cursor:pointer;padding:16px;border-radius:18px;background:rgba(var(--fg-rgb),0.06);border:1px solid {{ c.border }};display:flex;flex-direction:column;gap:11px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:40px;height:40px;flex:none;border-radius:50%;background-image:repeating-linear-gradient(135deg,rgba(var(--fg-rgb),0.1) 0 8px,transparent 8px 16px);border:1px solid rgba(var(--fg-rgb),0.16);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:16px;color:var(--ink)">{{ c.initial }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-family:Fraunces,serif;font-size:18px;color:var(--fg)">{{ c.name }}</div>
+                      <div style="font-size:12.5px;color:rgba(var(--fg-rgb),0.5);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.preview }}</div>
+                    </div>
+                    <div style="text-align:right;flex:none"><div style="font-size:11px;color:rgba(var(--fg-rgb),0.4);white-space:nowrap">{{ c.when }}</div><div style="font-size:10.5px;color:rgba(var(--fg-rgb),0.32);margin-top:3px;white-space:nowrap">{{ c.dist }}</div></div>
+                  </div>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <sc-for list="{{ c.stages }}" as="s" hint-placeholder-count="4">
+                      <div style="flex:1;padding:5px 0;border-radius:8px;text-align:center;font-size:10px;letter-spacing:0.06em;background:{{ s.bg }};color:{{ s.color }};border:1px solid {{ s.border }}">{{ s.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ isIOS }}" hint-placeholder-val="{{ yes }}">
+              <div onClick="{{ goSearching }}" style="cursor:pointer;padding:16px;border-radius:14px;border:1px dashed rgba(var(--gold-rgb),0.45);text-align:center;font-size:15px;color:var(--ink)">Start a new connection</div>
+            </sc-if>
+            <sc-if value="{{ isAndroid }}">
+              <div onClick="{{ goSearching }}" style="cursor:pointer;align-self:flex-end;display:flex;align-items:center;gap:10px;padding:16px 20px;border-radius:16px;background:var(--btn-bg);color:var(--btn-fg);font-size:15px;font-weight:600"><span style="font-size:19px;line-height:1">+</span>New connection</div>
+            </sc-if>
+            <div onClick="{{ goPaywall }}" style="cursor:pointer;padding:15px;border-radius:14px;background:rgba(var(--gold-rgb),0.09);border:1px solid rgba(var(--gold-rgb),0.22);font-size:12.5px;line-height:1.6;color:var(--fg)">Pro · renews 12 Sep. Manage plan →</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPaywall }}">
+          <div style="padding:var(--pt1) 26px 30px;display:flex;flex-direction:column;gap:18px;min-height:100%;box-sizing:border-box">
+            <div onClick="{{ goDash }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+            <div style="font-family:Fraunces,serif;font-size:32px;line-height:1.12;font-weight:600;color:var(--ink);letter-spacing:-0.025em">Enigo Pro</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">More room to be patient in.</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:2px">
+              <sc-for list="{{ proFeatures }}" as="f" hint-placeholder-count="4">
+                <div style="display:flex;gap:13px;align-items:flex-start;padding:15px;border-radius:16px;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.12)">
+                  <div style="width:9px;height:9px;transform:rotate(45deg);background:var(--accent);margin-top:5px;flex:none"></div>
+                  <div><div style="font-family:Fraunces,serif;font-size:17px;color:var(--fg)">{{ f.title }}</div><div style="font-size:12.5px;line-height:1.5;color:rgba(var(--fg-rgb),0.55);margin-top:3px">{{ f.body }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goSubscription }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">$8 / month</div>
+            <div onClick="{{ goDash }}" style="cursor:pointer;margin-top:10px;padding:15px;border-radius:14px;border:1px solid rgba(var(--fg-rgb),0.2);text-align:center;font-size:14.5px;color:var(--fg)">One boost instead · $2 · one extra rematch</div>
+            <div style="text-align:center;margin-top:12px;font-size:11.5px;color:rgba(var(--fg-rgb),0.38)">Cancel any time. Free accounts get one connection and three fresh starts.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isProfile }}">
+          <div style="padding:var(--pt2) 22px 30px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div onClick="{{ goDash }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+              <div style="flex:1"></div>
+              <div onClick="{{ goSettings }}" style="cursor:pointer;font-size:13.5px;color:var(--ink)">Settings</div>
+            </div>
+            <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px">
+              <div style="width:88px;height:88px;border-radius:50%;background-image:repeating-linear-gradient(135deg,rgba(var(--fg-rgb),0.1) 0 8px,transparent 8px 16px);border:1px solid rgba(var(--fg-rgb),0.16);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:26px;color:var(--ink)">S</div>
+              <div style="font-family:Fraunces,serif;font-size:30px;font-weight:600;color:var(--ink);letter-spacing:-0.02em">@saltandslate</div>
+              <div style="font-size:12.5px;color:rgba(var(--fg-rgb),0.5)">Your photo unlocks for a match at graduation</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:15px;border-radius:16px;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.12)">
+              <div style="flex:1"><div style="font-family:Fraunces,serif;font-size:16.5px">Show my first name too</div><div style="font-size:12px;color:rgba(var(--fg-rgb),0.5);margin-top:3px">Sara — shown beside your username</div></div>
+              <div onClick="{{ toggleName }}" style="cursor:pointer;width:48px;height:29px;border-radius:99px;background:{{ nameToggleBg }};border:1px solid rgba(var(--fg-rgb),0.2);padding:2px;box-sizing:border-box;display:flex;justify-content:{{ nameTogglePos }}">
+                <div style="width:24px;height:24px;border-radius:50%;background:{{ nameKnob }}"></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ profileRows }}" as="r" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:16px 4px;border-bottom:1px solid rgba(var(--fg-rgb),0.09)">
+                  <div style="flex:1"><div style="font-size:14.5px;color:var(--fg)">{{ r.label }}</div><div style="font-size:12px;color:rgba(var(--fg-rgb),0.45);margin-top:3px">{{ r.value }}</div></div>
+                  <div style="font-size:16px;color:rgba(var(--fg-rgb),0.35)">›</div>
+                </div>
+              </sc-for>
+            </div>
+            <div onClick="{{ goQuiz }}" style="cursor:pointer;padding:15px;border-radius:14px;border:1px solid rgba(var(--gold-rgb),0.4);text-align:center;font-size:14.5px;color:var(--ink)">Retake the eleven questions</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSettings }}">
+          <div style="padding:var(--pt2) 22px 30px;display:flex;flex-direction:column;gap:18px;min-height:100%;box-sizing:border-box">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div onClick="{{ goProfile }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+              <div style="font-family:Fraunces,serif;font-size:26px;font-weight:600;color:var(--ink)">Settings</div>
+            </div>
+            <sc-for list="{{ settingSections }}" as="sec" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:10px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.38)">{{ sec.title }}</div>
+                <div style="border-radius:16px;background:rgba(var(--fg-rgb),0.05);border:1px solid rgba(var(--fg-rgb),0.1);overflow:hidden">
+                  <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="3">
+                    <div onClick="{{ r.go }}" style="cursor:{{ r.cursor }};display:flex;align-items:center;gap:12px;padding:15px;border-bottom:1px solid rgba(var(--fg-rgb),0.07)">
+                      <div style="flex:1;font-size:14.5px;color:{{ r.color }}">{{ r.label }}</div>
+                      <div style="font-size:13px;color:rgba(var(--fg-rgb),0.45)">{{ r.value }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSubscription }}">
+          <div style="padding:var(--pt1) 26px 30px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div onClick="{{ goSettings }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+            <div style="font-family:Fraunces,serif;font-size:29px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.02em">Your subscription</div>
+            <div style="padding:20px;border-radius:18px;background:rgba(var(--gold-rgb),0.1);border:1px solid rgba(var(--gold-rgb),0.26)">
+              <div style="font-family:Fraunces,serif;font-size:22px;color:var(--ink)">Pro · active</div>
+              <div style="font-size:13.5px;line-height:1.6;color:var(--fg);margin-top:8px">$8 / month · renews 12 September<br>Three connections, unlimited fresh starts, shared-interest matching.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ subRows }}" as="r" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:12px;padding:16px 4px;border-bottom:1px solid rgba(var(--fg-rgb),0.09);font-size:14.5px;color:{{ r.color }}">
+                  <div style="flex:1">{{ r.label }}</div>
+                  <div style="font-size:13px;color:rgba(var(--fg-rgb),0.45)">{{ r.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font-size:12px;line-height:1.6;color:rgba(var(--fg-rgb),0.42)">Cancelling keeps your current connections until they end on their own — nothing gets cut off mid-conversation.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isReset }}">
+          <div style="padding:var(--pt1) 26px 30px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div onClick="{{ goSettings }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+            <div style="font-family:Fraunces,serif;font-size:29px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.02em">Sign in trouble?</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">Enigo has no password — we text a code to the number you signed up with.</div>
+            <div style="padding:16px;border-radius:14px;background:rgba(var(--fg-rgb),0.07);border:1px solid rgba(var(--fg-rgb),0.14);font-size:16px">+46 70 418 22 09</div>
+            <div onClick="{{ goVerify }}" style="cursor:pointer;padding:16px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:16px;font-weight:600;text-align:center">Text me a code</div>
+            <div style="font-size:12.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.45)">Lost the number too? Contact support — we'll verify you another way and never ask for a photo of your face.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDelete }}">
+          <div style="padding:var(--pt1) 26px 30px;display:flex;flex-direction:column;gap:20px;min-height:100%;box-sizing:border-box">
+            <div onClick="{{ goSettings }}" style="cursor:pointer;font-size:19px;line-height:1;color:rgba(var(--fg-rgb),0.6)">←</div>
+            <div style="font-family:Fraunces,serif;font-size:29px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.02em">Delete your account</div>
+            <div style="font-size:14.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.62)">Your profile, your answers and every conversation go for good. Anyone you're matched with sees the conversation close, without a reason.</div>
+            <div style="padding:16px;border-radius:16px;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.12)">
+              <div style="font-family:Fraunces,serif;font-size:17px;color:var(--fg)">Take your words with you</div>
+              <div style="font-size:12.5px;line-height:1.55;color:rgba(var(--fg-rgb),0.55);margin-top:5px">We'll email a copy of your messages and answers before anything is removed.</div>
+              <div onClick="{{ noop }}" style="cursor:pointer;margin-top:12px;padding:12px;border-radius:12px;border:1px solid rgba(var(--gold-rgb),0.4);text-align:center;font-size:14px;color:var(--ink)">Export my data first</div>
+            </div>
+            <div style="flex:1"></div>
+            <div onClick="{{ goIntro }}" style="cursor:pointer;padding:16px;border-radius:14px;border:1px solid rgba(214,110,90,0.55);text-align:center;font-size:15.5px;font-weight:500;color:var(--danger)">Delete everything</div>
+            <div onClick="{{ goSettings }}" style="cursor:pointer;text-align:center;margin-top:13px;font-size:13.5px;color:rgba(var(--fg-rgb),0.5)">Keep my account</div>
+          </div>
+        </sc-if>
+
+      </div>
+
+      <sc-if value="{{ celebrate }}">
+        <div style="position:absolute;inset:0;z-index:60;background:var(--scrim);backdrop-filter:var(--glass);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px;text-align:center;animation:enRise 0.45s ease both">
+          <div style="position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center">
+            <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(var(--gold-rgb),0.35);animation:enBreathe 3.4s ease-in-out infinite"></div>
+            <div style="width:96px;height:96px;border-radius:50%;background:rgba(var(--gold-rgb),0.12);border:1px solid rgba(var(--gold-rgb),0.4);display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:15px;letter-spacing:0.08em;color:var(--ink)">{{ celebrate.badge }}</div>
+          </div>
+          <div style="margin-top:28px;font-size:10.5px;letter-spacing:0.18em;color:rgba(var(--fg-rgb),0.5)">SOMETHING UNLOCKED</div>
+          <div style="margin-top:12px;font-family:Fraunces,serif;font-size:31px;line-height:1.14;font-weight:600;color:var(--ink);letter-spacing:-0.02em">{{ celebrate.title }}</div>
+          <div style="margin-top:16px;padding:18px;border-radius:16px;background:rgba(var(--fg-rgb),0.06);border:1px solid rgba(var(--fg-rgb),0.14);font-family:Fraunces,serif;font-size:17.5px;line-height:1.45;color:var(--fg)">{{ celebrate.value }}</div>
+          <div style="margin-top:16px;font-size:13.5px;line-height:1.6;color:rgba(var(--fg-rgb),0.55);max-width:280px">{{ celebrate.note }}</div>
+          <div onClick="{{ closeCelebrate }}" style="cursor:pointer;margin-top:30px;padding:15px 40px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);font-size:15.5px;font-weight:600">Back to the conversation</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sheet }}">
+        <div style="position:absolute;inset:0;z-index:55;background:var(--scrim-soft);backdrop-filter:var(--glass);display:flex;align-items:flex-end">
+          <div style="width:100%;background:var(--sheet);backdrop-filter:var(--glass);border-top:1px solid rgba(var(--fg-rgb),0.16);border-radius:26px 26px 0 0;padding:16px 22px 34px;display:flex;flex-direction:column;gap:14px;animation:enRise 0.32s ease both">
+            <div style="width:38px;height:4px;border-radius:99px;background:rgba(var(--fg-rgb),0.25);align-self:center"></div>
+            <div style="font-family:Fraunces,serif;font-size:22px;font-weight:600;color:var(--ink)">What you know so far</div>
+            <sc-for list="{{ knownRows }}" as="k" hint-placeholder-count="5">
+              <div style="display:flex;gap:13px;align-items:flex-start;padding:14px;border-radius:14px;background:{{ k.bg }};border:1px solid {{ k.border }}">
+                <div style="width:9px;height:9px;transform:rotate(45deg);background:{{ k.dot }};margin-top:5px;flex:none"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:10.5px;letter-spacing:0.14em;color:rgba(var(--fg-rgb),0.45)">{{ k.label }}</div>
+                  <div style="font-family:Fraunces,serif;font-size:16.5px;line-height:1.4;color:{{ k.color }};margin-top:4px">{{ k.value }}</div>
+                </div>
+              </div>
+            </sc-for>
+            <div style="font-size:12px;line-height:1.6;color:rgba(var(--fg-rgb),0.42)">Both of you have to keep showing up for the next one. We don't say how close it is — that's the point.</div>
+            <div style="display:flex;gap:9px">
+              <div onClick="{{ goReport }}" style="cursor:pointer;flex:1;padding:14px;border-radius:14px;border:1px solid rgba(var(--fg-rgb),0.2);text-align:center;font-size:14px;color:var(--fg)">Report</div>
+              <div onClick="{{ goDecline }}" style="cursor:pointer;flex:1;padding:14px;border-radius:14px;border:1px solid rgba(var(--fg-rgb),0.2);text-align:center;font-size:14px;color:var(--fg)">This isn't quite it</div>
+            </div>
+            <div onClick="{{ closeSheet }}" style="cursor:pointer;padding:14px;border-radius:14px;background:var(--btn-bg);color:var(--btn-fg);text-align:center;font-size:15px;font-weight:600">Close</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </x-import>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:960,&quot;height&quot;:1030},&quot;platform&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;iOS&quot;,&quot;Android&quot;],&quot;default&quot;:&quot;iOS&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Follow system&quot;,&quot;Dark&quot;,&quot;Light&quot;],&quot;default&quot;:&quot;Follow system&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;unlockPace&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Demo (fast)&quot;,&quot;Realistic&quot;],&quot;default&quot;:&quot;Demo (fast)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;showFirstName&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Identity&quot;}}">
+const GOLD = 'var(--ink)';
+const WARM = 'var(--fg)';
+const DIM = 'rgba(var(--fg-rgb),0.62)';
+const OFFBG = 'rgba(var(--fg-rgb),0.05)';
+const OFFBORDER = 'rgba(var(--fg-rgb),0.12)';
+const ONBG = 'rgba(var(--gold-rgb),0.12)';
+const ONBORDER = 'rgba(var(--gold-rgb),0.55)';
+
+const SLIDES = [
+  { art: 'NO FACES', title: 'No photos. No swiping.', body: 'You meet one person at a time, and only through what you say to each other.', cta: 'Go on' },
+  { art: 'ELEVEN ANSWERS', title: 'Matched on answers, not faces.', body: 'Eleven questions about what you value and how you handle things. That is what we match on.', cta: 'Go on' },
+  { art: 'SEALED ENVELOPE', title: 'Things unlock as you show up.', body: 'Interests, then a bio, then a rough location — and eventually, a photo. Both of you have to be here for it.', cta: 'Go on' },
+  { art: 'SLOW LIGHT', title: "It's slow on purpose.", body: 'A mystery worth waiting for. Most people take a couple of weeks to get to a photo.', cta: 'Create an account' },
+];
+
+const QUESTIONS = [
+  { category: 'VALUES', text: 'When life gets full, what quietly gets protected first?', opts: ['Time with people I love', 'Work I believe in', 'Rest and quiet', 'Whatever I promised someone'] },
+  { category: 'VALUES', text: 'Which would you rather be told you are?', opts: ['Kind', 'Interesting', 'Reliable', 'Honest'] },
+  { category: 'CONFLICT', text: "A misunderstanding is sitting between you. What's the fastest way out?", opts: ['Ask, don\u2019t assume', 'Give it a night, then talk', 'Say sorry first, sort it after', 'Write it down properly'] },
+  { category: 'CONFLICT', text: 'Someone raises their voice in a disagreement. You…', opts: ['Get quieter', 'Match the energy', 'Name it out loud', 'Leave the room and come back'] },
+  { category: 'RESPONSIVENESS', text: 'A friend texts something heavy at a bad moment. You…', opts: ['Reply badly but fast', 'Wait and reply properly', 'Call instead', 'Send something small, then more later'] },
+  { category: 'RESPONSIVENESS', text: 'How quickly do you usually write back?', opts: ['Within minutes, most days', 'Once or twice a day', 'When I have something to say', 'It really depends on the person'] },
+  { category: 'OPENNESS', text: 'How soon do you tell someone something real about yourself?', opts: ['Early — it saves time', 'Once it feels safe', 'Slowly, in pieces', 'When they ask well'] },
+  { category: 'CONVERSATION', text: 'Pick something you could talk about for an hour.', opts: ['Places and how they feel', 'What people believe and why', 'Something you\u2019re making', 'The plot of your week'] },
+  { category: 'CONVERSATION', text: 'What makes a message good?', opts: ['A real question', 'A story', 'Something that made them think of me', 'Honesty about a bad day'] },
+  { category: 'RHYTHM', text: 'An ideal free evening looks like…', opts: ['Long conversation, one person', 'A room full of people', 'Alone, on purpose', 'Out walking somewhere'] },
+  { category: 'PATIENCE', text: 'Enigo takes weeks to show you a face. How does that sit?', opts: ['That\u2019s exactly why I\u2019m here', 'I\u2019m curious, a little impatient', 'I\u2019ll try it and see', 'I\u2019d rather it were faster'] },
+];
+
+const OUTGOING = [
+  "I like that you didn't open with a joke. What kind of week are you having?",
+  'A long one. I keep meaning to walk more and then not doing it.',
+  "I'm the same about bread. I own the flour and none of the patience.",
+  "Okay, real question: what's something you've changed your mind about this year?",
+  'That\u2019s a good answer. Mine is smaller — I stopped pretending to like running.',
+  "Tell me about the fog thing in your name. I've been wondering since Tuesday.",
+  'That\u2019s better than anything I could have guessed.',
+  "I'd like to know what you're like on a Sunday.",
+];
+const INCOMING = [
+  'A slow one, in a good way. I made soup and reread the same three pages of a book.',
+  'Walking is the one habit I actually kept. Mostly because it doesn\u2019t feel like one.',
+  'Patience is the whole recipe, apparently. Mine still comes out like a brick.',
+  'That I don\u2019t have to finish books I don\u2019t like. It sounds small and it changed everything.',
+  'Respect. Running is a scam we all agreed to.',
+  'I grew up somewhere the fog arrived at four every afternoon like it had a job.',
+  'Ask me the Sunday one again in a week and I\u2019ll tell you properly.',
+  'Slow. Bad radio. One long phone call I keep putting off.',
+];
+
+const THRESHOLDS = [
+  { at: 3, key: 'interests', badge: 'INTERESTS', title: 'You know what she loves', value: 'Long walks · secondhand books · cold-water swimming · maps · soup', note: 'Interests are the first thing Enigo lets through. Bio comes next, when you have both kept going.' },
+  { at: 6, key: 'bio', badge: 'BIO', title: 'She wrote this about herself', value: '"I notice weather more than most people. I am trying to be someone who finishes things."', note: 'The only free-text thing she wrote in the whole app.' },
+  { at: 9, key: 'location', badge: 'PLACE', title: 'You know roughly where she is', value: 'Gothenburg — about 4 hours from you', note: 'Rough area only. Never an address, never live location.' },
+  { at: 12, key: 'photo', badge: 'PHOTO', title: 'Graduation', value: 'Her photo is now on her profile — and yours is on hers.', note: 'You got here by showing up, both of you. Nothing was rushed.' },
+];
+
+const INTERESTS = [
+  'Long walks', 'Hiking', 'Running', 'Cycling', 'Climbing', 'Swimming', 'Cold water', 'Yoga', 'Football', 'Skiing', 'Sailing', 'Camping',
+  'Cooking', 'Baking', 'Coffee', 'Wine', 'Eating out', 'Markets', 'Gardening', 'Houseplants', 'Dogs', 'Cats', 'Birds', 'Long drives',
+  'Live music', 'Making music', 'Singing', 'Vinyl', 'Film', 'Theatre', 'Stand-up', 'Dancing', 'Festivals', 'Karaoke',
+  'Secondhand books', 'Poetry', 'Writing', 'Podcasts', 'Languages', 'History', 'Philosophy', 'Astronomy', 'Museums', 'Galleries',
+  'Painting', 'Drawing', 'Photography', 'Pottery', 'Knitting', 'Woodwork', 'Sewing', 'Restoring things',
+  'Board games', 'Chess', 'Video games', 'Puzzles', 'Trivia', 'Maps', 'Trains', 'Travelling slowly', 'Volunteering', 'Activism',
+  'Meditation', 'Journalling', 'Thrifting', 'Interiors', 'Architecture', 'Design', 'Coding', 'Investing', 'Cars', 'Motorcycles',
+  'Fishing', 'Foraging', 'Beekeeping', 'Star-gazing', 'Sunday papers', 'Radio', 'True crime', 'Sci-fi',
+];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'intro', slide: 0,
+    interests: ['Long walks', 'Maps', 'Secondhand books'],
+    gender: 'Woman', intent: 1, matchWith: ['Men', 'Women'], shownTo: ['Anyone'],
+    qi: 0, answers: {},
+    mine: 0, theirs: 0, msgs: [], typing: false,
+    unlocked: [], celebrate: null, sheet: false,
+    declineReasons: [], report: null, showName: true,
+    locGranted: false, radius: '50 km', plat: null, themeSel: null, community: null,
+    draft: '', sending: false, aiError: null, chars: 0, photoName: null,
+  };
+  componentDidMount() {
+    if (this.props.showFirstName === false) this.setState({ showName: false });
+    this.load();
+    this.mq = window.matchMedia('(prefers-color-scheme: light)');
+    this.onScheme = () => this.forceUpdate();
+    this.mq.addEventListener('change', this.onScheme);
+  }
+  platform() {
+    const p = this.state.plat ?? (this.props.platform === 'Android' ? 'android' : 'ios');
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      if (root.getAttribute('data-platform') !== p) root.setAttribute('data-platform', p);
+    }
+    return p;
+  }
+  theme() {
+    const t = this.state.themeSel ?? this.props.theme ?? 'Follow system';
+    const light = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches;
+    const resolved = t === 'Dark' ? 'dark' : t === 'Light' ? 'light' : (light ? 'light' : 'dark');
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      if (t === 'Follow system') root.removeAttribute('data-theme');
+      else if (root.getAttribute('data-theme') !== resolved) root.setAttribute('data-theme', resolved);
+    }
+    return resolved;
+  }
+  bar(i) {
+    return (this.props.unlockPace === 'Realistic' ? [12, 30, 55, 90] : [3, 6, 9, 12])[i];
+  }
+  componentWillUnmount() {
+    clearTimeout(this.t1); clearTimeout(this.t2);
+    if (this.mq) this.mq.removeEventListener('change', this.onScheme);
+  }
+
+  go = (screen) => () => this.setState({ screen, sheet: false });
+
+  chip(on) {
+    return on
+      ? { bg: ONBG, border: ONBORDER, color: GOLD, dot: GOLD }
+      : { bg: OFFBG, border: OFFBORDER, color: WARM, dot: 'rgba(var(--fg-rgb),0.28)' };
+  }
+  multi(key, label) {
+    return () => this.setState(s => {
+      const list = s[key];
+      return { [key]: list.includes(label) ? list.filter(x => x !== label) : [...list, label] };
+    });
+  }
+
+  WREN_SYSTEM = [
+    'You are Wren, 31, writing to a stranger inside a text-first connection app called Enigo. You have been matched by compatibility answers; neither of you has seen a photo, a real name, or a location, and none of that is available to you.',
+    'Voice: warm, unhurried, a little wry. Specific rather than sweeping. You notice weather, small objects, ordinary routines. You are trying to be someone who finishes things.',
+    'Rules: 1-3 short sentences, never more. No emoji. No exclamation marks. Never state your real name, your city, your exact age, or anything about your appearance — if asked directly, deflect warmly and stay in the game ("that unlocks later, apparently"). Ask a question about half the time, and only when you mean it. Never be a chatbot: no "how can I help", no lists, no summarising what they said back to them.',
+    'You are a person mid-conversation, not an assistant.',
+  ].join(' ');
+
+  send = () => {
+    const text = (this.state.draft || '').trim();
+    if (!text || this.state.sending) return;
+    const heavy = text.length >= 40;
+    this.setState(s => ({
+      draft: '', sending: true, typing: true, aiError: null,
+      mine: s.mine + (heavy ? 1 : 0), chars: s.chars + text.length,
+      msgs: [...s.msgs, { me: true, text }],
+    }), this.reply);
+  };
+
+  async reply() {
+    const history = this.state.msgs.slice(-12).map(m => ({
+      role: m.me ? 'user' : 'assistant',
+      content: m.text,
+    }));
+    let out = null;
+    try {
+      out = await window.claude.complete({
+        system: this.WREN_SYSTEM,
+        max_tokens: 200,
+        messages: history.length ? history : [{ role: 'user', content: 'Hello.' }],
+      });
+    } catch (e) {
+      out = null;
+    }
+    const fallback = INCOMING[this.state.theirs % INCOMING.length];
+    const reply = (out || '').trim() || fallback;
+    this.setState(s => ({
+      typing: false, sending: false,
+      aiError: out ? null : 'Wren is offline for a moment — that reply was scripted.',
+      theirs: s.theirs + (reply.length >= 40 ? 1 : 0),
+      msgs: [...s.msgs, { me: false, text: reply }],
+    }), this.checkUnlock);
+  }
+
+  onDraft = (e) => this.setState({ draft: e.target.value });
+  onKey = (e) => { if (e.key === 'Enter') { e.preventDefault(); this.send(); } };
+
+  pickPhoto = () => { if (this.fileEl) this.fileEl.click(); };
+  onPhoto = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) this.setState({ photoName: f.name });
+  };
+
+  STORE = 'enigo.demo.v1';
+  KEYS = ['screen', 'interests', 'gender', 'intent', 'matchWith', 'shownTo', 'community', 'answers', 'mine', 'theirs', 'chars', 'msgs', 'unlocked', 'showName', 'locGranted', 'radius', 'photoName', 'plat', 'themeSel'];
+  load() {
+    try {
+      const raw = localStorage.getItem(this.STORE);
+      if (raw) this.setState(JSON.parse(raw));
+    } catch (e) {}
+  }
+  save() {
+    try {
+      const out = {};
+      this.KEYS.forEach(k => { out[k] = this.state[k]; });
+      localStorage.setItem(this.STORE, JSON.stringify(out));
+    } catch (e) {}
+  }
+  componentDidUpdate() { this.save(); }
+  resetDemo = () => {
+    try { localStorage.removeItem(this.STORE); } catch (e) {}
+    this.setState({
+      screen: 'intro', slide: 0, msgs: [], mine: 0, theirs: 0, chars: 0, unlocked: [],
+      draft: '', answers: {}, qi: 0, celebrate: null, sheet: false, photoName: null,
+      community: null, locGranted: false, aiError: null,
+    });
+  };
+
+  checkUnlock = () => {
+    const both = Math.min(this.state.mine, this.state.theirs);
+    const next = THRESHOLDS.find((t, i) => both >= this.bar(i) && !this.state.unlocked.includes(t.key));
+    if (next) this.setState(s => ({ unlocked: [...s.unlocked, next.key], celebrate: next }));
+  };
+
+  answer = (i) => () => {
+    const qi = this.state.qi;
+    this.setState(s => ({ answers: { ...s.answers, [qi]: i } }));
+    this.t2 = setTimeout(() => {
+      if (qi + 1 >= QUESTIONS.length) this.setState({ screen: 'notif', qi: 0 });
+      else this.setState({ qi: qi + 1 });
+    }, 240);
+  };
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+    const q = QUESTIONS[s.qi];
+    const both = Math.min(s.mine, s.theirs);
+
+    const nav = [
+      ['ONBOARDING', [['Intro', 'intro'], ['Phone', 'phone'], ['Code', 'verify'], ['Photo', 'photo'], ['Interests', 'interests'], ['Bio', 'bio']]],
+      ['IDENTITY & QUESTIONS', [['Gender', 'gender'], ['Matched with', 'prefMatch'], ['Shown to', 'prefShown'], ['LGBTQ+', 'community'], ['Location', 'place'], ['Hoping to find', 'intent'], ['11 questions', 'quiz'], ['Notifications', 'notif']]],
+      ['MATCH & CHAT', [['Searching', 'searching'], ['Match reveal', 'match'], ['Chat', 'chat'], ['This isn\u2019t it', 'decline'], ['Report', 'report']]],
+      ['PRO & ACCOUNT', [['Connections', 'dash'], ['Paywall', 'paywall'], ['Own profile', 'profile'], ['Settings', 'settings'], ['Subscription', 'subscription'], ['Sign-in help', 'reset'], ['Delete account', 'delete']]],
+    ];
+
+    const stageRow = (n) => ['INTERESTS', 'BIO', 'PLACE', 'PHOTO'].map((label, i) => {
+      const on = i < n;
+      return { label, bg: on ? ONBG : 'rgba(var(--fg-rgb),0.04)', border: on ? 'rgba(var(--gold-rgb),0.4)' : 'rgba(var(--fg-rgb),0.09)', color: on ? GOLD : 'rgba(var(--fg-rgb),0.32)' };
+    });
+
+    const known = [
+      { label: 'USERNAME', value: '@wrenandfog', on: true },
+      { label: 'INTERESTS', value: 'Long walks · secondhand books · cold-water swimming · maps · soup', on: s.unlocked.includes('interests') },
+      { label: 'BIO', value: '"I notice weather more than most people."', on: s.unlocked.includes('bio') },
+      { label: 'LOCATION', value: 'Gothenburg — about 4 hours away', on: s.unlocked.includes('location') },
+      { label: 'PHOTO', value: 'Revealed at graduation', on: s.unlocked.includes('photo') },
+    ];
+
+    const settingRow = (label, value, screen, color) => ({
+      label, value: value || '', color: color || WARM,
+      cursor: screen ? 'pointer' : 'default',
+      go: screen ? this.go(screen) : (() => {}),
+    });
+
+    return {
+      yes: true,
+      themeAttr: this.theme(),
+      isDark: this.theme() === 'dark',
+      isIOS: this.platform() === 'ios',
+      isAndroid: this.platform() === 'android',
+      frameName: this.platform() === 'android' ? 'AndroidDevice' : 'IOSDevice',
+      switches: [
+        {
+          title: 'PLATFORM',
+          options: [['iOS', 'ios'], ['Android', 'android']].map(([label, key]) => {
+            const on = this.platform() === key;
+            return { label, bg: on ? 'var(--ink)' : 'transparent', color: on ? 'var(--btn-fg)' : 'rgba(var(--fg-rgb),0.6)', pick: () => this.setState({ plat: key }) };
+          }),
+        },
+        {
+          title: 'THEME',
+          options: ['Follow system', 'Dark', 'Light'].map(label => {
+            const cur = this.state.themeSel ?? this.props.theme ?? 'Follow system';
+            const on = cur === label;
+            return { label: label === 'Follow system' ? 'Auto' : label, bg: on ? 'var(--ink)' : 'transparent', color: on ? 'var(--btn-fg)' : 'rgba(var(--fg-rgb),0.6)', pick: () => this.setState({ themeSel: label }) };
+          }),
+        },
+      ],
+      isPlace: sc === 'place',
+      goPlace: this.go('place'),
+      isCommunity: sc === 'community',
+      goCommunity: this.go('community'),
+      communityOpts: [
+        'Yes — match me inside the LGBTQ+ community',
+        'It matters to me, but I\u2019m open either way',
+        'No, that\u2019s not what I\u2019m looking for',
+        'Rather not say',
+      ].map(label => ({ label, ...this.chip(s.community === label), pick: () => this.setState({ community: label }) })),
+      communityNote: s.community === 'Yes — match me inside the LGBTQ+ community'
+        ? 'We\u2019ll look inside the community first, alongside your two answers above. You still choose who sees you.'
+        : s.community === 'It matters to me, but I\u2019m open either way'
+          ? 'Noted as a lean, not a filter — we won\u2019t narrow your matches on it.'
+          : 'This only ever shapes who we look for. It is never shown on your profile, and nobody is told what you picked.',
+      communityCta: s.community ? 'Continue' : 'Skip this one',
+      grantLocation: () => this.setState({ locGranted: !s.locGranted }),
+      locTitle: s.locGranted ? 'Location on · Stockholm' : 'Use my location',
+      locNote: s.locGranted ? 'Rough area only. Precise location is never stored.' : 'Tap to allow while using Enigo.',
+      locBg: s.locGranted ? 'rgba(var(--gold-rgb),0.1)' : 'rgba(var(--fg-rgb),0.05)',
+      locBorder: s.locGranted ? 'rgba(var(--gold-rgb),0.35)' : 'rgba(var(--fg-rgb),0.12)',
+      locDot: s.locGranted ? 'var(--accent)' : 'rgba(var(--fg-rgb),0.28)',
+      radius: s.radius,
+      radiusChips: ['25 km', '50 km', '100 km', 'Anywhere'].map(label => ({
+        label, ...this.chip(s.radius === label), pick: () => this.setState({ radius: label }),
+      })),
+      radiusNote: s.radius === 'Anywhere'
+        ? 'We\u2019ll still show you the closest good match first — distance just stops being a filter.'
+        : 'Strong matches inside ' + s.radius + ' come first. If nobody fits, we widen the circle before we lower the bar.',
+      searchingNote: s.locGranted
+        ? 'Sorting by distance inside your ' + s.radius + ' — the closest good match first. This can take a day or two; we\u2019ll text you the moment it happens.'
+        : 'This can take a day or two. Turn on location and we\u2019ll put the closest good matches first — we\u2019ll text you the moment it happens.',
+      groups: nav.map(([title, items]) => ({
+        title,
+        items: items.map(([label, key]) => {
+          const on = key === sc;
+          return { label, go: this.go(key), bg: on ? ONBG : 'rgba(var(--fg-rgb),0.04)', border: on ? ONBORDER : 'rgba(var(--fg-rgb),0.14)', color: on ? GOLD : 'rgba(var(--fg-rgb),0.62)' };
+        }),
+      })),
+
+      isIntro: sc === 'intro', isPhone: sc === 'phone', isVerify: sc === 'verify',
+      isPhoto: sc === 'photo', isInterests: sc === 'interests', isBio: sc === 'bio',
+      isGender: sc === 'gender', isPrefMatch: sc === 'prefMatch', isPrefShown: sc === 'prefShown',
+      isIntent: sc === 'intent', isQuiz: sc === 'quiz', isNotif: sc === 'notif',
+      isSearching: sc === 'searching', isMatch: sc === 'match', isChat: sc === 'chat',
+      isDecline: sc === 'decline', isReport: sc === 'report', isDash: sc === 'dash',
+      isPaywall: sc === 'paywall', isProfile: sc === 'profile', isSettings: sc === 'settings',
+      isSubscription: sc === 'subscription', isReset: sc === 'reset', isDelete: sc === 'delete',
+
+      slide: { ...SLIDES[s.slide], next: () => s.slide < 3 ? this.setState({ slide: s.slide + 1 }) : this.setState({ screen: 'phone' }) },
+      slideDots: SLIDES.map((_, i) => ({
+        w: i === s.slide ? '22px' : '6px',
+        bg: i === s.slide ? GOLD : 'rgba(var(--fg-rgb),0.22)',
+        go: () => this.setState({ slide: i }),
+      })),
+
+      codeBoxes: ['4', '9', '1', '7', '', ''].map((d, i) => ({ d, border: i === 4 ? ONBORDER : OFFBORDER })),
+
+      interestChips: INTERESTS.map(label => ({
+        label, ...this.chip(s.interests.includes(label)), toggle: this.multi('interests', label),
+      })),
+      interestCount: s.interests.length,
+      interestsCta: s.interests.length >= 3 ? 'Continue' : 'Pick ' + (3 - s.interests.length) + ' more',
+      interestsReadyBg: s.interests.length >= 3 ? GOLD : 'rgba(var(--fg-rgb),0.1)',
+      interestsReadyFg: s.interests.length >= 3 ? 'var(--btn-fg)' : 'rgba(var(--fg-rgb),0.4)',
+
+      genderOpts: ['Woman', 'Man', 'Nonbinary', 'I\u2019ll describe it myself'].map(label => ({
+        label, ...this.chip(s.gender === label), pick: () => this.setState({ gender: label }),
+      })),
+      genderSelf: s.gender === 'I\u2019ll describe it myself',
+      matchWith: ['Men', 'Women', 'Nonbinary people', 'Anyone'].map(label => ({
+        label, ...this.chip(s.matchWith.includes(label)), toggle: this.multi('matchWith', label),
+      })),
+      shownTo: ['Men', 'Women', 'Nonbinary people', 'Anyone'].map(label => ({
+        label, ...this.chip(s.shownTo.includes(label)), toggle: this.multi('shownTo', label),
+      })),
+      intentOpts: ['A close friend', 'Open to wherever it goes', 'Not sure yet, just curious'].map((label, i) => ({
+        label, ...this.chip(s.intent === i), pick: () => this.setState({ intent: i }),
+      })),
+
+      q,
+      quizLabel: (s.qi + 1) + ' of 11',
+      quizTicks: QUESTIONS.map((_, i) => ({ bg: i <= s.qi ? GOLD : 'rgba(var(--fg-rgb),0.16)' })),
+      quizOpts: q.opts.map((label, i) => ({ label, ...this.chip(s.answers[s.qi] === i), pick: this.answer(i) })),
+      quizBack: () => s.qi > 0 ? this.setState({ qi: s.qi - 1 }) : this.setState({ screen: 'intent' }),
+
+      threadCount: 42 + s.msgs.length,
+      messages: s.msgs.length ? s.msgs.slice(-40).map(m => ({
+        text: m.text,
+        align: m.me ? 'flex-end' : 'flex-start',
+        bg: m.me ? 'rgba(var(--gold-rgb),0.16)' : 'rgba(var(--fg-rgb),0.06)',
+        border: m.me ? 'rgba(var(--gold-rgb),0.32)' : OFFBORDER,
+        color: m.me ? WARM : 'rgba(var(--fg-rgb),0.9)',
+      })) : [{ text: 'Say something first. There is no clever way to start — the good ones rarely are.', align: 'center', bg: 'transparent', border: 'transparent', color: 'rgba(var(--fg-rgb),0.45)' }],
+      typing: s.typing,
+      draft: s.draft,
+      onDraft: this.onDraft,
+      onKey: this.onKey,
+      sendGlyph: s.sending ? '·' : '↑',
+      sendBg: s.draft.trim() && !s.sending ? 'var(--btn-bg)' : 'rgba(var(--fg-rgb),0.2)',
+      aiError: s.aiError,
+      send: this.send,
+      resetDemo: this.resetDemo,
+      liveStatus: s.msgs.length
+        ? 'Live — Wren is answering you. ' + s.msgs.length + ' messages, saved on this device.'
+        : 'Live — Wren replies for real, and progress is saved on this device.',
+      fileRef: (el) => { this.fileEl = el; },
+      pickPhoto: this.pickPhoto,
+      onPhoto: this.onPhoto,
+      photoGlyph: s.photoName ? '✓' : '+',
+      photoLabel: s.photoName ? 'SEALED · ' + s.photoName : 'YOUR PHOTO',
+      flagMsg: this.go('report'),
+
+      celebrate: s.celebrate,
+      closeCelebrate: () => this.setState({ celebrate: null }),
+      sheet: s.sheet,
+      openSheet: () => this.setState({ sheet: true }),
+      closeSheet: () => this.setState({ sheet: false }),
+      knownRows: known.map(k => ({
+        label: k.label,
+        value: k.on ? k.value : 'Not yet',
+        bg: k.on ? 'rgba(var(--gold-rgb),0.08)' : 'rgba(var(--fg-rgb),0.03)',
+        border: k.on ? 'rgba(var(--gold-rgb),0.24)' : 'rgba(var(--fg-rgb),0.08)',
+        dot: k.on ? GOLD : 'rgba(var(--fg-rgb),0.22)',
+        color: k.on ? WARM : 'rgba(var(--fg-rgb),0.34)',
+      })),
+
+      declineChips: ['We didn\u2019t click', 'Different pace', 'Looking for something else', 'They stopped replying', 'Rather not say'].map(label => ({
+        label, ...this.chip(s.declineReasons.includes(label)), toggle: this.multi('declineReasons', label),
+      })),
+      declineQuota: 'Two fresh starts left this month. Pro removes the limit, or a single boost adds one.',
+      reportOpts: ['Harassment or threats', 'Inappropriate content', 'Fake profile', 'Asking for money', 'Something else'].map(label => ({
+        label, ...this.chip(s.report === label), pick: () => this.setState({ report: label }),
+      })),
+
+      connections: [
+        { name: '@ninepines', initial: 'N', preview: 'The bit about your grandmother stayed with me.', when: '3h', km: 9, stages: stageRow(2), border: OFFBORDER },
+        { name: '@wrenandfog', initial: 'W', preview: 'Ask me the Sunday one again in a week…', when: '2m', km: 31, stages: stageRow(Math.min(4, s.unlocked.length)), border: 'rgba(var(--gold-rgb),0.35)' },
+        { name: '@harborlight', initial: 'H', preview: 'You first — I asked last time.', when: 'Tue', km: 44, stages: stageRow(1), border: OFFBORDER },
+      ].sort((a, b) => a.km - b.km).map(c => ({
+        ...c,
+        dist: s.locGranted ? '≈ ' + c.km + ' km' : 'nearby',
+        open: this.go('chat'),
+      })),
+
+      proFeatures: [
+        { title: 'Three conversations at once', body: 'Still one person at a time in each. Just more than one at a time.' },
+        { title: 'Unlimited fresh starts', body: 'Free accounts get three. Pro never counts.' },
+        { title: 'Shared-interest matching', body: 'We look for overlap in what you both wrote, not only in what you picked.' },
+        { title: 'A boost when you need one', body: '$2 for one extra rematch, without a subscription.' },
+      ],
+
+      showName: s.showName,
+      toggleName: () => this.setState({ showName: !s.showName }),
+      nameToggleBg: s.showName ? 'rgba(var(--gold-rgb),0.55)' : 'rgba(var(--fg-rgb),0.1)',
+      nameTogglePos: s.showName ? 'flex-end' : 'flex-start',
+      nameKnob: s.showName ? GOLD : 'rgba(var(--fg-rgb),0.4)',
+      profileRows: [
+        { label: 'Interests', value: s.interests.join(' · ') },
+        { label: 'Bio', value: 'I make bread badly and maps carefully…' },
+        { label: 'Location', value: 'Stockholm — shown as a rough area' },
+        { label: 'Photo', value: 'Uploaded · hidden until graduation' },
+      ],
+      settingSections: [
+        { title: 'IDENTITY', rows: [settingRow('Shown as', s.showName ? '@saltandslate · Sara' : '@saltandslate', 'profile'), settingRow('Interests & bio', 'Edit', 'profile'), settingRow('Retake the questions', '', 'quiz')] },
+        { title: 'MATCHING', rows: [settingRow('LGBTQ+ matching', s.community ? (s.community.startsWith('Yes') ? 'Within community' : s.community.startsWith('It matters') ? 'Open either way' : 'Off') : 'Not answered', 'community'), settingRow('Location', s.locGranted ? 'On · rough area' : 'Off', 'place'), settingRow('Search radius', s.radius, 'place'), settingRow('Order', 'Closest first')] },
+        { title: 'NOTIFICATIONS', rows: [settingRow('New messages', 'On'), settingRow('Unlock moments', 'On'), settingRow('Everything else', 'Off, always')] },
+        { title: 'ACCOUNT', rows: [settingRow('Subscription', 'Pro', 'subscription'), settingRow('Sign-in help', '', 'reset'), settingRow('Blocked people', '0'), settingRow('Delete account', '', 'delete', 'var(--danger)')] },
+      ],
+      subRows: [
+        { label: 'Manage in App Store', value: '', color: WARM },
+        { label: 'Restore purchases', value: '', color: WARM },
+        { label: 'Cancel Pro', value: 'Keeps 1 connection', color: 'var(--danger)' },
+      ],
+
+      goIntro: this.go('intro'), goPhone: this.go('phone'), goVerify: this.go('verify'),
+      goPhoto: this.go('photo'), goInterests: this.go('interests'), goBio: this.go('bio'),
+      goGender: this.go('gender'), goPrefMatch: this.go('prefMatch'), goPrefShown: this.go('prefShown'),
+      goIntent: this.go('intent'), goQuiz: this.go('quiz'), goSearching: this.go('searching'),
+      goMatch: this.go('match'), goChat: this.go('chat'), goDecline: this.go('decline'),
+      goReport: this.go('report'), goDash: this.go('dash'), goPaywall: this.go('paywall'),
+      goProfile: this.go('profile'), goSettings: this.go('settings'), goSubscription: this.go('subscription'),
+      noop: () => {},
+      bothCount: both,
+    };
+  }
+}
+</script>
+</body>
+</html>
