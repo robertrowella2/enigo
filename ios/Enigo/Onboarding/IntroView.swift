@@ -12,12 +12,7 @@ struct IntroView: View {
             RoundedRectangle(cornerRadius: EnigoRadius.card)
                 .fill(EnigoColor.fgAlpha(scheme, 0.06))
                 .frame(height: 210)
-                .overlay(
-                    Text(slide.art)
-                        .font(EnigoFont.eyebrow)
-                        .tracking(3)
-                        .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.4))
-                )
+                .overlay(IntroArtwork(kind: slide.art))
 
             Text(slide.title)
                 .font(EnigoFont.fraunces(size: 33, weight: 600))

@@ -119,7 +119,15 @@ class AppState : ViewModel() {
 
     fun submitVerify() = run {
         Backend.verifyOtp(normalizedPhone, verifyCode)
-        step = Step.Photo
+        // This phone number may already belong to a completed account (e.g.
+        // reinstalling the app, or verifying again after signing out) — in
+        // that case skip straight to the dashboard instead of re-running
+        // onboarding and overwriting their existing profile.
+        if (runCatching { Backend.fetchOwnProfile() }.getOrNull() != null) {
+            openDashboard()
+        } else {
+            step = Step.Photo
+        }
     }
 
     fun submitPhoto() { step = Step.Interests }

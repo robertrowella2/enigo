@@ -92,7 +92,8 @@ data class MatchStateResponse(
     val interests: List<String>? = null,
     val bio: String? = null,
     val distanceKm: Int? = null,
-    val photoUrl: String? = null
+    val photoUrl: String? = null,
+    val partnerReadAt: String? = null
 )
 
 @Serializable

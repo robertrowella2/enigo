@@ -20,8 +20,15 @@ struct ChatView: View {
                                 .padding(.top, 24)
                         }
                         ForEach(vm.messages) { message in
-                            MessageBubble(message: message, isMine: message.senderId == Backend.shared.userId)
+                            let isMine = message.senderId == Backend.shared.userId
+                            MessageBubble(message: message, isMine: isMine)
                                 .id(message.id)
+                            if isMine, message.id == lastMineId, isReadByPartner(message) {
+                                Text("Read")
+                                    .font(EnigoFont.meta)
+                                    .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.4))
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                            }
                         }
                     }
                     .padding(.horizontal, EnigoSpacing.listHorizontal)
@@ -61,6 +68,25 @@ struct ChatView: View {
         })
     }
 
+    private var lastMineId: UUID? {
+        vm.messages.last(where: { $0.senderId == Backend.shared.userId })?.id
+    }
+
+    private func isReadByPartner(_ message: ChatMessage) -> Bool {
+        guard let raw = vm.matchState?.partnerReadAt else { return false }
+        for options: ISO8601DateFormatter.Options in [
+            [.withInternetDateTime, .withFractionalSeconds],
+            [.withInternetDateTime],
+        ] {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = options
+            if let readAt = formatter.date(from: raw) {
+                return message.createdAt <= readAt
+            }
+        }
+        return false
+    }
+
     private var header: some View {
         HStack {
             Button(action: { appState.openDashboard() }) {
@@ -89,6 +115,7 @@ struct ChatView: View {
     private var composer: some View {
         HStack(spacing: 10) {
             TextField("Type something real...", text: $vm.draft, axis: .vertical)
+                .id(vm.sendGeneration)
                 .font(EnigoFont.chatMessage)
                 .padding(12)
                 .background(RoundedRectangle(cornerRadius: EnigoRadius.input).fill(EnigoColor.fgAlpha(scheme, 0.06)))

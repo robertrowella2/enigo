@@ -27,16 +27,24 @@ export default {
     }
     const partnerId = match.user_a === callerId ? match.user_b : match.user_a;
 
-    const [{ data: unlockRows, error: unlocksError }, { data: partner, error: partnerError }, { data: callerProfile, error: callerError }] =
-      await Promise.all([
-        admin.from("unlocks").select("field").eq("match_id", matchId),
-        admin
-          .from("profiles")
-          .select("username, first_name, show_first_name, interests, bio, photo_path, lat, lng")
-          .eq("id", partnerId)
-          .single(),
-        admin.from("profiles").select("lat, lng").eq("id", callerId).single(),
-      ]);
+    const [
+      { data: unlockRows, error: unlocksError },
+      { data: partner, error: partnerError },
+      { data: callerProfile, error: callerError },
+      { data: partnerCounter },
+    ] = await Promise.all([
+      admin.from("unlocks").select("field").eq("match_id", matchId),
+      admin
+        .from("profiles")
+        .select("username, first_name, show_first_name, interests, bio, photo_path, lat, lng")
+        .eq("id", partnerId)
+        .single(),
+      admin.from("profiles").select("lat, lng").eq("id", callerId).single(),
+      admin.from("match_counters").select("last_read_at").eq("match_id", matchId).eq("user_id", partnerId).maybeSingle(),
+      // Calling get-match-state means the caller has this chat open — mark
+      // everything sent so far as read by them.
+      admin.from("match_counters").update({ last_read_at: new Date().toISOString() }).eq("match_id", matchId).eq("user_id", callerId),
+    ]);
     if (unlocksError) throw unlocksError;
     if (partnerError) throw partnerError;
     if (callerError) throw callerError;
@@ -49,6 +57,7 @@ export default {
       status: match.status,
       partnerUsername: partner.username,
       unlocked: Array.from(unlocked),
+      partnerReadAt: partnerCounter?.last_read_at ?? null,
     };
 
     if (partner.show_first_name && partner.first_name) {

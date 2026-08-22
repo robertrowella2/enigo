@@ -31,14 +31,20 @@ export async function recordMessage(
   matchId: string,
   senderId: string | null,
   body: string,
-  opts: { isSystem?: boolean } = {},
+  opts: { isSystem?: boolean; id?: string } = {},
 ): Promise<{ charCount: number; isHeavy: boolean }> {
   const isSystem = opts.isSystem ?? false;
   const charCount = body.length;
   const heavyMin = Number(await getAppConfig(admin, "heavy_message_min_chars"));
   const isHeavy = !isSystem && charCount >= heavyMin;
 
+  // Accepts an optional client-generated id so the client's own optimistic
+  // local bubble and the row that comes back on the next refresh share the
+  // same identity — otherwise a UI list keyed by id sees a real delete+insert
+  // (the optimistic entry vanishing, a new one appearing) and visibly
+  // flashes/jumps even though nothing actually changed from the user's POV.
   const { error: insertError } = await admin.from("messages").insert({
+    ...(opts.id ? { id: opts.id } : {}),
     match_id: matchId,
     sender_id: senderId,
     body,
@@ -142,10 +148,38 @@ export async function generateAiReply(
 ): Promise<UnlockField | null> {
   const { data: persona, error: personaError } = await admin
     .from("profiles")
-    .select("ai_system_prompt")
+    .select("ai_system_prompt, interests, bio")
     .eq("id", aiUserId)
     .single();
   if (personaError) throw personaError;
+
+  const { data: unlockRows, error: unlocksError } = await admin
+    .from("unlocks")
+    .select("field")
+    .eq("match_id", matchId);
+  if (unlocksError) throw unlocksError;
+  const unlocked = new Set((unlockRows ?? []).map((r: { field: string }) => r.field));
+  const locked = FIELD_ORDER.filter((f) => !unlocked.has(f));
+
+  const systemPrompt = `${persona.ai_system_prompt}
+
+---
+Current state of this specific match (this is real, not hypothetical — both
+of you crossed these thresholds together by how much you've each written):
+- Unlocked so far, visible to both of you: ${unlocked.size ? [...unlocked].join(", ") : "nothing yet"}.
+- Still locked, invisible to both of you: ${locked.length ? locked.join(", ") : "nothing — everything has unlocked"}.
+Only bring up something as known or visible if it's in the unlocked list above.
+If "interests" is unlocked, your interests are: ${persona.interests?.join(", ") || "none listed"} — you can
+reference them naturally, but you don't need to list them all at once. If "bio" is unlocked, your bio is:
+"${persona.bio ?? "none listed"}". Never reveal your own interests or bio ahead of their matching unlock,
+even if asked directly — deflect in character per the rules above instead. If asked how Enigo itself
+works, you can explain accurately that matches reveal interests, then a short bio, then a rough location,
+then a photo last, gated by how much the two of you have actually talked — but always as yourself, in
+character, never breaking into an assistant-like explanation.
+
+Reply quality: engage with something specific they actually said — a detail, not a generic acknowledgment.
+Let your reply length vary naturally with the moment instead of defaulting to the same short length every
+time. Don't reuse the same sentence structure or opening two turns in a row.`;
 
   const { data: history, error: historyError } = await admin
     .from("messages")
@@ -178,7 +212,7 @@ export async function generateAiReply(
         body: JSON.stringify({
           model: Deno.env.get("ANTHROPIC_MODEL") ?? "claude-sonnet-5",
           max_tokens: 200,
-          system: persona.ai_system_prompt,
+          system: systemPrompt,
           messages: messages.length ? messages : [{ role: "user", content: "Hello." }],
         }),
       });
@@ -201,6 +235,14 @@ export async function generateAiReply(
   }
 
   await recordMessage(admin, matchId, aiUserId, reply);
+  // The persona "read" everything up to this point the moment it processed
+  // it to generate this reply — same read-receipt mechanism as a human
+  // opening the chat (see get-match-state).
+  await admin
+    .from("match_counters")
+    .update({ last_read_at: new Date().toISOString() })
+    .eq("match_id", matchId)
+    .eq("user_id", aiUserId);
   return await checkAndApplyUnlocks(admin, matchId);
 }
 

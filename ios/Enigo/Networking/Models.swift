@@ -57,6 +57,12 @@ struct MatchStateResponse: Decodable {
     var bio: String?
     var distanceKm: Int?
     var photoUrl: String?
+    // Raw ISO8601 string, not Date — this response is decoded by the
+    // Supabase client's Functions invoker, which (unlike the `db` client)
+    // doesn't use Backend's custom ISO8601 date-decoding strategy, so a
+    // Date field here fails with "Expected value of type Double". Parsed
+    // on demand in ChatView instead.
+    var partnerReadAt: String?
 
     var isGraduated: Bool { unlocked.contains("photo") }
 }

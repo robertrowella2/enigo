@@ -69,9 +69,6 @@ struct DashboardView: View {
             await appState.loadSubscriptionStatus()
             await loadRows()
         }
-        .onChange(of: appState.activeMatchIds) { _, _ in
-            Task { await loadRows() }
-        }
     }
 
     private func loadRows() async {

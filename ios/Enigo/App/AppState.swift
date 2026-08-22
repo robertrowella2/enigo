@@ -1,5 +1,6 @@
 import CoreLocation
 import Foundation
+import Supabase
 import SwiftUI
 
 enum Step: Equatable {
@@ -131,7 +132,15 @@ final class AppState: ObservableObject {
     func submitVerify() async {
         await run {
             try await self.backend.verifyOTP(phone: self.normalizedPhone, code: self.verifyCode)
-            self.step = .photo
+            // This phone number may already belong to a completed account
+            // (e.g. reinstalling the app, or verifying again after signing
+            // out) — in that case skip straight to the dashboard instead of
+            // re-running onboarding and overwriting their existing profile.
+            if (try? await self.backend.fetchOwnProfile()) != nil {
+                self.openDashboard()
+            } else {
+                self.step = .photo
+            }
         }
     }
 
@@ -382,8 +391,10 @@ final class AppState: ObservableObject {
         errorMessage = nil
         do {
             try await body()
+        } catch let error as PostgrestError {
+            errorMessage = error.message
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = Backend.friendlyMessage(from: error)
         }
         isBusy = false
     }

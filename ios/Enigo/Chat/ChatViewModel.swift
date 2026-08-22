@@ -5,6 +5,13 @@ final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
     @Published var matchState: MatchStateResponse?
     @Published var draft: String = ""
+    /// Bumped every time `draft` is cleared programmatically after a send.
+    /// A multi-line TextField(axis: .vertical) bound to `draft` can visibly
+    /// keep showing the old text even though the underlying value is
+    /// correctly empty (a known SwiftUI sync quirk) — ChatView gives the
+    /// TextField `.id(sendGeneration)` so it's rebuilt fresh instead of
+    /// relying on the stale in-place render.
+    @Published var sendGeneration = 0
     @Published var isSending = false
     @Published var celebrationField: UnlockField?
     @Published var showKnownSheet = false
@@ -62,15 +69,37 @@ final class ChatViewModel: ObservableObject {
     func send() {
         guard let matchId, !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         let text = draft
+        draft = ""
+        sendGeneration += 1
         isSending = true
+
+        // Show it immediately rather than waiting on the round trip — for an
+        // AI match that round trip includes the persona's own reply
+        // generation, which can take a couple of seconds on its own. The
+        // id is generated here and sent to the server as-is (see
+        // clientMessageId), so the row that comes back from the next
+        // refresh() has the *same* identity as this optimistic one instead
+        // of a server-generated id — otherwise the list (keyed by id) sees
+        // a real delete+insert and visibly flashes even though nothing
+        // actually changed from the user's point of view.
+        let messageId = UUID()
+        let optimistic = ChatMessage(
+            id: messageId, matchId: matchId, senderId: backend.userId,
+            body: text, isHeavy: false, isSystem: false, createdAt: Date()
+        )
+        messages.append(optimistic)
+
         Task {
             do {
-                try await backend.sendMessage(matchId: matchId, body: text)
-                draft = ""
+                try await backend.sendMessage(matchId: matchId, body: text, clientMessageId: messageId)
                 await refresh()
             } catch {
-                // Leave the draft in place — e.g. a blocked message (phone
-                // number, photo link) shouldn't force the user to retype it.
+                // Roll back the optimistic bubble and restore the draft —
+                // e.g. a blocked message (phone number, photo link) shouldn't
+                // look like it sent, and shouldn't force the user to retype it.
+                messages.removeAll { $0.id == optimistic.id }
+                draft = text
+                sendGeneration += 1
                 errorMessage = Backend.friendlyMessage(from: error)
             }
             isSending = false

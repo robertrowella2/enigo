@@ -33,6 +33,15 @@ import com.enigo.app.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+private fun isReadByPartner(message: ChatMessage, partnerReadAt: String?): Boolean {
+    if (partnerReadAt == null) return false
+    return try {
+        !java.time.Instant.parse(message.createdAt).isAfter(java.time.Instant.parse(partnerReadAt))
+    } catch (_: Exception) {
+        false
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(appState: AppState, matchId: String) {
@@ -74,15 +83,36 @@ fun ChatScreen(appState: AppState, matchId: String) {
     fun send() {
         val text = draft.trim()
         if (text.isEmpty()) return
+        draft = ""
         isSending = true
+
+        // Show it immediately rather than waiting on the round trip — for an
+        // AI match that round trip includes the persona's own reply
+        // generation, which can take a couple of seconds on its own. The id
+        // is generated here and sent to the server as-is (clientMessageId),
+        // so the row that comes back from the next refresh() has the *same*
+        // identity as this optimistic one instead of a server-generated id
+        // — otherwise the list (keyed by id) sees a real delete+insert and
+        // visibly flashes even though nothing actually changed from the
+        // user's point of view.
+        val optimisticId = java.util.UUID.randomUUID().toString()
+        val optimistic = ChatMessage(
+            id = optimisticId, matchId = matchId, senderId = Backend.userId.value,
+            body = text, isHeavy = false, isSystem = false,
+            createdAt = java.time.Instant.now().toString()
+        )
+        messages = messages + optimistic
+
         scope.launch {
             try {
-                Backend.sendMessage(matchId, text)
-                draft = ""
+                Backend.sendMessage(matchId, text, optimisticId)
                 refresh()
             } catch (e: Exception) {
-                // Leave the draft in place — e.g. a blocked message (phone
-                // number, photo link) shouldn't force the user to retype it.
+                // Roll back the optimistic bubble and restore the draft —
+                // e.g. a blocked message (phone number, photo link) shouldn't
+                // look like it sent, and shouldn't force the user to retype it.
+                messages = messages.filterNot { it.id == optimisticId }
+                draft = text
                 errorMessage = Backend.friendlyMessage(e)
             }
             isSending = false
@@ -140,8 +170,19 @@ fun ChatScreen(appState: AppState, matchId: String) {
                     )
                 }
             }
+            val lastMineId = messages.lastOrNull { it.senderId == Backend.userId.value }?.id
             items(messages) { message ->
-                MessageBubble(message, message.senderId == Backend.userId.value, dark)
+                val isMine = message.senderId == Backend.userId.value
+                MessageBubble(message, isMine, dark)
+                if (isMine && message.id == lastMineId && isReadByPartner(message, matchState?.partnerReadAt)) {
+                    Text(
+                        "Read",
+                        color = EnigoColor.fgAlpha(dark, 0.4f),
+                        fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End
+                    )
+                }
             }
         }
 

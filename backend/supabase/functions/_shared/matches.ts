@@ -20,6 +20,26 @@ export async function isPro(admin: AdminClient, userId: string): Promise<boolean
   return data?.tier === "pro" && data?.status === "active";
 }
 
+/**
+ * True if userId has room for another active match given their tier (free =
+ * 1, Pro = up to 3). find_match_candidates already guarantees mutual
+ * compatibility (gender/community/distance) before a candidate reaches this
+ * check — this only additionally protects a real candidate from being pulled
+ * into a match beyond their own capacity by someone else's find-match call.
+ * Not applied to AI personas, which aren't a capacity-limited resource.
+ */
+export async function hasOpenSlot(admin: AdminClient, userId: string): Promise<boolean> {
+  const [{ count }, max] = await Promise.all([
+    admin
+      .from("matches")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "active")
+      .or(`user_a.eq.${userId},user_b.eq.${userId}`),
+    getMaxConcurrentMatches(admin, userId),
+  ]);
+  return (count ?? 0) < max;
+}
+
 export async function createMatch(
   admin: AdminClient,
   userA: string,

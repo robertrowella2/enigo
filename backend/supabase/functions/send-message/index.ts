@@ -14,12 +14,15 @@ export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     const callerId = ctx.userClaims!.id;
     const admin = ctx.supabaseAdmin;
-    const { matchId, body } = await req.json();
+    const { matchId, body, clientMessageId } = await req.json();
 
     const text = typeof body === "string" ? body.trim() : "";
     if (!text || text.length > MAX_LEN) {
       return Response.json({ message: "Invalid message body", code: "invalid_body" }, { status: 400 });
     }
+
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const messageId = typeof clientMessageId === "string" && UUID_RE.test(clientMessageId) ? clientMessageId : undefined;
 
     const blockReason = checkMessageContent(text);
     if (blockReason) {
@@ -38,25 +41,34 @@ export default {
       return Response.json({ message: "Not a participant of this match", code: "forbidden" }, { status: 403 });
     }
 
-    await recordMessage(admin, matchId, callerId, text);
-    let unlockedField: UnlockField | null = await checkAndApplyUnlocks(admin, matchId);
-
-    if (match.is_ai_match) {
-      const aiUserId = match.user_a === callerId ? match.user_b : match.user_a;
-      // Synchronous for v1 simplicity; move to fire-and-forget/queue if reply
-      // latency becomes a problem.
-      const replyUnlock = await generateAiReply(admin, matchId, aiUserId);
-      unlockedField = unlockedField ?? replyUnlock;
-      await notifyNewMessage(admin, callerId, aiUserId);
-    } else {
-      const recipientId = match.user_a === callerId ? match.user_b : match.user_a;
-      await notifyNewMessage(admin, recipientId, callerId);
-    }
+    await recordMessage(admin, matchId, callerId, text, { id: messageId });
+    const unlockedField: UnlockField | null = await checkAndApplyUnlocks(admin, matchId);
 
     if (unlockedField) {
       await Promise.all(
         [match.user_a, match.user_b].map((uid: string) => notifyUnlock(admin, uid)),
       );
+    }
+
+    if (match.is_ai_match) {
+      const aiUserId = match.user_a === callerId ? match.user_b : match.user_a;
+      // Claude's own reply generation can take a couple of seconds — don't
+      // make the human wait on it just to see their own message land. Runs
+      // after the response is sent; still notified/unlock-checked once it
+      // finishes. Falls back to awaiting inline if EdgeRuntime.waitUntil
+      // isn't available in this runtime, rather than silently dropping the
+      // AI's reply.
+      const aiTask = generateAiReplyAndNotify(admin, matchId, aiUserId, callerId);
+      // deno-lint-ignore no-explicit-any
+      const waitUntil = (globalThis as any).EdgeRuntime?.waitUntil;
+      if (waitUntil) {
+        waitUntil(aiTask);
+      } else {
+        await aiTask;
+      }
+    } else {
+      const recipientId = match.user_a === callerId ? match.user_b : match.user_a;
+      await notifyNewMessage(admin, recipientId, callerId);
     }
 
     return Response.json({ ok: true });
@@ -77,4 +89,17 @@ async function notifyUnlock(admin: any, userId: string): Promise<void> {
   const { data: profile } = await admin.from("profiles").select("notify_unlocks, is_ai").eq("id", userId).single();
   if (!profile || profile.is_ai || !profile.notify_unlocks) return;
   await sendPushToUser(admin, userId, "Something unlocked", "A new part of your connection just unlocked.");
+}
+
+// deno-lint-ignore no-explicit-any
+async function generateAiReplyAndNotify(admin: any, matchId: string, aiUserId: string, humanUserId: string): Promise<void> {
+  try {
+    const replyUnlock = await generateAiReply(admin, matchId, aiUserId);
+    await notifyNewMessage(admin, humanUserId, aiUserId);
+    if (replyUnlock) {
+      await Promise.all([humanUserId, aiUserId].map((uid) => notifyUnlock(admin, uid)));
+    }
+  } catch (e) {
+    console.error("AI reply generation failed:", e);
+  }
 }

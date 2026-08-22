@@ -8,7 +8,23 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { getAppConfig, recordMessage } from "../_shared/mechanic.ts";
-import { createMatch, endMatch, getMaxConcurrentMatches } from "../_shared/matches.ts";
+import { createMatch, endMatch, getMaxConcurrentMatches, hasOpenSlot } from "../_shared/matches.ts";
+
+// deno-lint-ignore no-explicit-any
+type AdminClient = any;
+
+/** First candidate (already ranked by score/distance) that isn't already at
+ * their own concurrent-match capacity. find_match_candidates only guarantees
+ * mutual compatibility, not that the other person has room for us. */
+async function firstAvailable(
+  admin: AdminClient,
+  candidates: { candidate_id: string }[],
+): Promise<string | null> {
+  for (const c of candidates) {
+    if (await hasOpenSlot(admin, c.candidate_id)) return c.candidate_id;
+  }
+  return null;
+}
 
 export default {
   fetch: withSupabase({ auth: "user" }, async (_req, ctx) => {
@@ -31,14 +47,14 @@ export default {
         { p_caller_id: callerId, p_include_ai: false },
       );
       if (realError) throw realError;
-      if (!realCandidates?.length) continue;
+      const candidateId = realCandidates?.length ? await firstAvailable(admin, realCandidates) : null;
+      if (!candidateId) continue;
 
-      const candidateId = realCandidates[0].candidate_id;
       await recordMessage(
         admin,
         m.id,
         null,
-        "This one's ended. Looking for your next connection...",
+        "Someone real showed up — this one's stepping aside for them.",
         { isSystem: true },
       );
       await endMatch(admin, m.id, "upgraded_to_real", null);
@@ -57,9 +73,10 @@ export default {
         { p_caller_id: callerId, p_include_ai: false },
       );
       if (realError) throw realError;
+      const realCandidateId = realCandidates?.length ? await firstAvailable(admin, realCandidates) : null;
 
-      if (realCandidates?.length) {
-        const newId = await createMatch(admin, callerId, realCandidates[0].candidate_id, false);
+      if (realCandidateId) {
+        const newId = await createMatch(admin, callerId, realCandidateId, false);
         matches.push({ id: newId, is_ai_match: false });
       } else {
         const aiMatchingEnabled = await getAppConfig(admin, "ai_matching_enabled");
