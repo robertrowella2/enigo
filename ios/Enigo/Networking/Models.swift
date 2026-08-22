@@ -93,6 +93,7 @@ struct OwnProfile: Decodable {
     var locationGranted: Bool
     var notifyMessages: Bool
     var notifyUnlocks: Bool
+    var notifyMatches: Bool
     var rematchCredits: Int
 }
 
@@ -108,6 +109,7 @@ struct ProfilePatch: Encodable {
     var locationGranted: Bool?
     var notifyMessages: Bool?
     var notifyUnlocks: Bool?
+    var notifyMatches: Bool?
 }
 
 /// The five "Known" sheet fields, in fixed unlock order.

@@ -15,6 +15,7 @@ import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.storage
+import kotlin.time.Duration.Companion.minutes
 import io.ktor.client.call.body
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -127,6 +128,13 @@ object Backend {
         client.storage.from("photos").upload(path, bytes) { upsert = true }
         return path
     }
+
+    /// The `photos` bucket is private — unlike a partner's photo (only
+    /// revealed via get-match-state's signed URL once unlocked), the owner
+    /// can always read their own via the "photos: owner can read own"
+    /// storage policy, so this goes straight to Storage, no edge function.
+    suspend fun ownPhotoURL(path: String): String =
+        client.storage.from("photos").createSignedUrl(path, 5.minutes)
 
     @Serializable private data class SendMessageBody(val matchId: String, val body: String, val clientMessageId: String)
     @Serializable private data class MatchIdBody(val matchId: String)

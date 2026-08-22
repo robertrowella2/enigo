@@ -19,8 +19,7 @@ struct DashboardView: View {
                         .foregroundStyle(EnigoColor.body(scheme))
                 }
                 Button(action: { appState.openProfile() }) {
-                    Image(systemName: "person.circle")
-                        .foregroundStyle(EnigoColor.body(scheme))
+                    ProfileAvatar(url: appState.ownPhotoURL, size: 28)
                 }
             }
 
@@ -34,7 +33,19 @@ struct DashboardView: View {
                 ConnectionRow(state: row) { appState.openChat(row.matchId) }
             }
 
-            Button(action: { Task { await appState.startNewConnection(); await loadRows() } }) {
+            Button(action: {
+                // Free tier holds 1 concurrent match, Pro up to 3 (see
+                // getMaxConcurrentMatches server-side) — tapping this while
+                // already full used to just silently no-op, since find-match
+                // has no open slot to fill; ask about upgrading instead of
+                // doing nothing visible.
+                let maxMatches = (appState.subscriptionStatus?.isPro ?? false) ? 3 : 1
+                if rows.count >= maxMatches {
+                    appState.openPaywall()
+                } else {
+                    Task { await appState.startNewConnection(); await loadRows() }
+                }
+            }) {
                 HStack {
                     Image(systemName: "plus")
                     Text("Start a new connection").font(EnigoFont.chipLabel)
@@ -67,7 +78,9 @@ struct DashboardView: View {
         .task {
             await appState.refreshDashboard()
             await appState.loadSubscriptionStatus()
+            await appState.loadOwnProfile()
             await loadRows()
+            appState.autoSearchIfFreeAndEmpty()
         }
     }
 

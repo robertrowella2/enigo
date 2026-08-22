@@ -87,6 +87,7 @@ final class AppState: ObservableObject {
 
     @Published var activeMatchIds: [UUID] = []
     @Published var ownProfile: OwnProfile?
+    @Published var ownPhotoURL: URL?
     @Published var subscriptionStatus: SubscriptionStatus?
 
     private let backend = Backend.shared
@@ -203,6 +204,18 @@ final class AppState: ObservableObject {
 
     // MARK: - Matching
 
+    /// Free tier holds exactly 1 concurrent match, so an empty dashboard for
+    /// a free user always means "matchless," not "chose to leave a slot
+    /// open" — unlike Pro, which can genuinely have spare capacity by
+    /// choice. Called from DashboardView so a free user with nothing active
+    /// goes straight into the searching flow instead of sitting on an empty
+    /// "Start a new connection" screen requiring an extra tap.
+    func autoSearchIfFreeAndEmpty() {
+        guard activeMatchIds.isEmpty, subscriptionStatus?.isPro != true else { return }
+        step = .searching
+        beginSearching()
+    }
+
     private func beginSearching() {
         searchTask?.cancel()
         searchTask = Task {
@@ -282,6 +295,9 @@ final class AppState: ObservableObject {
     func loadOwnProfile() async {
         do {
             ownProfile = try await backend.fetchOwnProfile()
+            if let path = ownProfile?.photoPath {
+                ownPhotoURL = try? await backend.ownPhotoURL(path: path)
+            }
         } catch {
             errorMessage = error.localizedDescription
         }

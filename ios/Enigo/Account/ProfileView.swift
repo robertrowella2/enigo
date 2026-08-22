@@ -17,6 +17,8 @@ struct ProfileView: View {
             }
 
             if let profile = appState.ownProfile {
+                ProfileAvatar(url: appState.ownPhotoURL, size: 72)
+
                 Text("@\(profile.username)")
                     .font(EnigoFont.matchUsername)
                     .foregroundStyle(EnigoColor.dominant(scheme))

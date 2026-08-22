@@ -49,15 +49,29 @@ async function sendApns(token: string, title: string, body: string): Promise<voi
   const signature = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(signingInput));
   const jwt = `${signingInput}.${base64url(new Uint8Array(signature))}`;
 
-  const res = await fetch(`https://api.push.apple.com/3/device/${token}`, {
-    method: "POST",
-    headers: {
-      authorization: `bearer ${jwt}`,
-      "apns-topic": bundleId,
-      "apns-push-type": "alert",
-    },
-    body: JSON.stringify({ aps: { alert: { title, body }, sound: "default" } }),
-  });
+  const send = (host: string) =>
+    fetch(`https://${host}/3/device/${token}`, {
+      method: "POST",
+      headers: {
+        authorization: `bearer ${jwt}`,
+        "apns-topic": bundleId,
+        "apns-push-type": "alert",
+      },
+      body: JSON.stringify({ aps: { alert: { title, body }, sound: "default" } }),
+    });
+
+  // A device token is only ever valid for the APNs environment the app was
+  // signed for — a debug/development-signed build (every install before an
+  // App Store or TestFlight release) registers a sandbox-only token, which
+  // production APNs rejects with "BadEnvironmentKeyInToken". Same
+  // prod-then-sandbox fallback shape as verifyAppleTransaction.
+  let res = await send("api.push.apple.com");
+  if (res.status === 400) {
+    const failure = await res.clone().json().catch(() => null);
+    if (failure?.reason === "BadEnvironmentKeyInToken") {
+      res = await send("api.sandbox.push.apple.com");
+    }
+  }
   if (!res.ok) {
     console.warn(`[push] APNs send failed: ${res.status} ${await res.text()}`);
   }

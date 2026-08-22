@@ -1,4 +1,6 @@
 import SwiftUI
+import UIKit
+import UserNotifications
 
 /// Settings — Identity, Matching (LGBTQ+ preference, location, radius,
 /// "Order: closest first"), Notifications (messages/unlocks, everything
@@ -13,6 +15,7 @@ struct SettingsView: View {
         ("not_looking", "Not what I'm looking for"),
         ("rather_not_say", "Rather not say"),
     ]
+    @State private var notificationsEnabled = false
 
     var body: some View {
         EnigoScreen {
@@ -43,6 +46,10 @@ struct SettingsView: View {
 
                 section("NOTIFICATIONS") {
                     Toggle(isOn: Binding(
+                        get: { profile.notifyMatches },
+                        set: { v in Task { await appState.patchProfile(ProfilePatch(notifyMatches: v)) } }
+                    )) { Text("New matches").font(EnigoFont.body) }
+                    Toggle(isOn: Binding(
                         get: { profile.notifyMessages },
                         set: { v in Task { await appState.patchProfile(ProfilePatch(notifyMessages: v)) } }
                     )) { Text("Messages").font(EnigoFont.body) }
@@ -51,6 +58,27 @@ struct SettingsView: View {
                         set: { v in Task { await appState.patchProfile(ProfilePatch(notifyUnlocks: v)) } }
                     )) { Text("Unlock moments").font(EnigoFont.body) }
                     Text("Everything else — Off, always").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                    // Onboarding only asks for push permission once — if it
+                    // was skipped, or a device token never made it to the
+                    // server for any reason, this is the only other place
+                    // to (re-)trigger it, so it's not stuck forever. Once
+                    // granted there's nothing more to do (no way to revoke
+                    // from within the app anyway — that's an OS Settings
+                    // thing), so the button goes inert rather than staying
+                    // tappable forever.
+                    PrimaryButton(
+                        title: notificationsEnabled ? "Notifications enabled" : "Enable notifications on this device",
+                        disabled: notificationsEnabled
+                    ) {
+                        Task {
+                            let granted = (try? await UNUserNotificationCenter.current()
+                                .requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+                            if granted {
+                                await MainActor.run { UIApplication.shared.registerForRemoteNotifications() }
+                                notificationsEnabled = true
+                            }
+                        }
+                    }
                 }
             }
 
@@ -68,7 +96,11 @@ struct SettingsView: View {
                 SecondaryLink(title: "Privacy Policy") { appState.presentedLegalDocument = .privacy }
             }
         }
-        .task { await appState.loadOwnProfile() }
+        .task {
+            await appState.loadOwnProfile()
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            notificationsEnabled = settings.authorizationStatus == .authorized
+        }
     }
 
     @ViewBuilder

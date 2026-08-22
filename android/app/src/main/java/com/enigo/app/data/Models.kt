@@ -66,6 +66,7 @@ data class OwnProfile(
     val locationGranted: Boolean = false,
     val notifyMessages: Boolean = true,
     val notifyUnlocks: Boolean = true,
+    val notifyMatches: Boolean = true,
     val rematchCredits: Int = 0
 )
 
@@ -79,7 +80,8 @@ data class ProfilePatch(
     val radiusKm: Int? = null,
     val locationGranted: Boolean? = null,
     val notifyMessages: Boolean? = null,
-    val notifyUnlocks: Boolean? = null
+    val notifyUnlocks: Boolean? = null,
+    val notifyMatches: Boolean? = null
 )
 
 @Serializable

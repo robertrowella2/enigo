@@ -9,9 +9,19 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { getAppConfig, recordMessage } from "../_shared/mechanic.ts";
 import { createMatch, endMatch, getMaxConcurrentMatches, hasOpenSlot } from "../_shared/matches.ts";
+import { sendPushToUser } from "../_shared/pushNotifications.ts";
 
 // deno-lint-ignore no-explicit-any
 type AdminClient = any;
+
+/** The only way a client otherwise learns about a new match is by polling
+ * find-match/get-match-state itself, which doesn't happen if the app isn't
+ * open — this is the one push telling someone a match exists at all. */
+async function notifyMatched(admin: AdminClient, userId: string): Promise<void> {
+  const { data: profile } = await admin.from("profiles").select("notify_matches, is_ai").eq("id", userId).single();
+  if (!profile || profile.is_ai || !profile.notify_matches) return;
+  await sendPushToUser(admin, userId, "New match", "Someone new is here. Say hello.");
+}
 
 /** First candidate (already ranked by score/distance) that isn't already at
  * their own concurrent-match capacity. find_match_candidates only guarantees
@@ -24,6 +34,29 @@ async function firstAvailable(
     if (await hasOpenSlot(admin, c.candidate_id)) return c.candidate_id;
   }
   return null;
+}
+
+const AI_FALLBACK_DELAY_MS = 2 * 60 * 1000;
+
+/** How long this caller has been searching for the slot they're currently
+ * trying to fill — since their most recently ended match, or since their
+ * profile was created if they've never had one (profiles only ever get
+ * created once onboarding fully completes, so that's the same moment their
+ * very first search began). Used to hold off matching with an AI persona
+ * for a couple of minutes, so a real candidate gets first chance. */
+async function searchingSinceMs(admin: AdminClient, callerId: string): Promise<number> {
+  const { data: lastEnded } = await admin
+    .from("matches")
+    .select("ended_at")
+    .or(`user_a.eq.${callerId},user_b.eq.${callerId}`)
+    .eq("status", "ended")
+    .order("ended_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (lastEnded?.ended_at) return new Date(lastEnded.ended_at).getTime();
+
+  const { data: profile } = await admin.from("profiles").select("created_at").eq("id", callerId).single();
+  return new Date(profile.created_at).getTime();
 }
 
 export default {
@@ -61,6 +94,7 @@ export default {
       const newId = await createMatch(admin, callerId, candidateId, false);
       matches = matches.filter((x) => x.id !== m.id);
       matches.push({ id: newId, is_ai_match: false });
+      await Promise.all([notifyMatched(admin, callerId), notifyMatched(admin, candidateId)]);
     }
 
     // 2. Fill any open slot (free = 1 total, Pro = up to 3).
@@ -78,9 +112,11 @@ export default {
       if (realCandidateId) {
         const newId = await createMatch(admin, callerId, realCandidateId, false);
         matches.push({ id: newId, is_ai_match: false });
+        await Promise.all([notifyMatched(admin, callerId), notifyMatched(admin, realCandidateId)]);
       } else {
         const aiMatchingEnabled = await getAppConfig(admin, "ai_matching_enabled");
-        if (aiMatchingEnabled) {
+        const searchedLongEnough = (Date.now() - await searchingSinceMs(admin, callerId)) >= AI_FALLBACK_DELAY_MS;
+        if (aiMatchingEnabled && searchedLongEnough) {
           const { data: aiCandidates, error: aiError } = await admin.rpc(
             "find_match_candidates",
             { p_caller_id: callerId, p_include_ai: true },
@@ -89,6 +125,7 @@ export default {
           if (aiCandidates?.length) {
             const newId = await createMatch(admin, callerId, aiCandidates[0].candidate_id, true);
             matches.push({ id: newId, is_ai_match: true });
+            await notifyMatched(admin, callerId);
           } else {
             searching = matches.length === 0;
           }

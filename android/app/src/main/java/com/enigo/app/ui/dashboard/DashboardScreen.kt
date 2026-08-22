@@ -55,7 +55,9 @@ fun DashboardScreen(appState: AppState) {
     LaunchedEffect(Unit) {
         appState.refreshDashboard()
         appState.loadSubscriptionStatus()
+        appState.loadOwnProfile()
         loadRows()
+        appState.autoSearchIfFreeAndEmpty()
     }
     LaunchedEffect(appState.activeMatchIds) { loadRows() }
 
@@ -72,11 +74,9 @@ fun DashboardScreen(appState: AppState) {
                     tint = EnigoColor.body(dark),
                     modifier = Modifier.clickable { appState.openSettings() }
                 )
-                Icon(
-                    Icons.Filled.AccountCircle, contentDescription = "Profile",
-                    tint = EnigoColor.body(dark),
-                    modifier = Modifier.clickable { appState.openProfile() }
-                )
+                Box(modifier = Modifier.clickable { appState.openProfile() }) {
+                    ProfileAvatar(appState.ownPhotoURL)
+                }
             }
         }
 
@@ -97,7 +97,19 @@ fun DashboardScreen(appState: AppState) {
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(EnigoRadius.control.dp))
                 .border(1.dp, EnigoColor.fgAlpha(dark, 0.2f), RoundedCornerShape(EnigoRadius.control.dp))
-                .clickable { scope.launch { appState.startNewConnection(); loadRows() } }
+                .clickable {
+                    // Free tier holds 1 concurrent match, Pro up to 3 (see
+                    // getMaxConcurrentMatches server-side) — tapping this
+                    // while already full used to just silently no-op, since
+                    // find-match has no open slot to fill; ask about
+                    // upgrading instead of doing nothing visible.
+                    val maxMatches = if (appState.subscriptionStatus?.isPro == true) 3 else 1
+                    if (rows.size >= maxMatches) {
+                        appState.openPaywall()
+                    } else {
+                        scope.launch { appState.startNewConnection(); loadRows() }
+                    }
+                }
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically

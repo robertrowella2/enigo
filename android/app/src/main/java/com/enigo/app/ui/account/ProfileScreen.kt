@@ -43,6 +43,8 @@ fun ProfileScreen(appState: AppState) {
 
         val profile = appState.ownProfile
         if (profile != null) {
+            ProfileAvatar(appState.ownPhotoURL, size = 72.dp)
+
             Text("@${profile.username}", color = EnigoColor.dominant(dark), fontFamily = EnigoFont.frauncesFamily(600), fontSize = EnigoFont.matchUsernameSize)
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

@@ -6,7 +6,7 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { recordMessage, checkAndApplyUnlocks, generateAiReply, UnlockField } from "../_shared/mechanic.ts";
 import { sendPushToUser } from "../_shared/pushNotifications.ts";
-import { checkMessageContent, messageForBlockReason } from "../_shared/contentFilter.ts";
+import { checkMessageContent, checkFragmentedPhoneNumber, messageForBlockReason } from "../_shared/contentFilter.ts";
 
 const MAX_LEN = 2000;
 
@@ -39,6 +39,26 @@ export default {
     }
     if (match.status !== "active" || (match.user_a !== callerId && match.user_b !== callerId)) {
       return Response.json({ message: "Not a participant of this match", code: "forbidden" }, { status: 403 });
+    }
+
+    // Catches someone splitting a phone number across several messages
+    // ("720" / "980" / "1520") to dodge the single-message check above —
+    // looks at this sender's own recent messages in this match alongside
+    // the new one.
+    const { data: recentRows } = await admin
+      .from("messages")
+      .select("body")
+      .eq("match_id", matchId)
+      .eq("sender_id", callerId)
+      .eq("is_system", false)
+      .order("created_at", { ascending: false })
+      .limit(8);
+    const recentBodiesOldToNew = (recentRows ?? []).map((r: { body: string }) => r.body).reverse();
+    if (checkFragmentedPhoneNumber(recentBodiesOldToNew, text)) {
+      return Response.json(
+        { message: messageForBlockReason("phone_number"), code: "content_blocked" },
+        { status: 400 },
+      );
     }
 
     await recordMessage(admin, matchId, callerId, text, { id: messageId });

@@ -138,6 +138,40 @@ struct SelectableChip: View {
     }
 }
 
+/// A user's own photo as a circular thumbnail, falling back to a generic
+/// silhouette while it's loading or if none was ever added. `url` is a
+/// short-lived signed URL (see Backend.ownPhotoURL) — never persisted, just
+/// fetched fresh each time the screen that shows it appears.
+struct ProfileAvatar: View {
+    @Environment(\.colorScheme) private var scheme
+    let url: URL?
+    var size: CGFloat = 28
+
+    var body: some View {
+        Group {
+            if let url {
+                AsyncImage(url: url) { phase in
+                    if let image = phase.image {
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } else {
+                        placeholder
+                    }
+                }
+            } else {
+                placeholder
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+    }
+
+    private var placeholder: some View {
+        Image(systemName: "person.circle")
+            .resizable()
+            .foregroundStyle(EnigoColor.body(scheme))
+    }
+}
+
 struct ProgressDots: View {
     @Environment(\.colorScheme) private var scheme
     let count: Int

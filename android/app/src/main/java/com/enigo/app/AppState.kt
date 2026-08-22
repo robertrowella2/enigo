@@ -81,6 +81,7 @@ class AppState : ViewModel() {
 
     var activeMatchIds by mutableStateOf<List<String>>(emptyList())
     var ownProfile by mutableStateOf<OwnProfile?>(null)
+    var ownPhotoURL by mutableStateOf<String?>(null)
     var subscriptionStatus by mutableStateOf<SubscriptionStatus?>(null)
     var rematchCreditsRemaining by mutableStateOf<Int?>(null)
     var rematchUnlimited by mutableStateOf(false)
@@ -184,6 +185,19 @@ class AppState : ViewModel() {
         beginSearching()
     }
 
+    /** Free tier holds exactly 1 concurrent match, so an empty dashboard for
+     * a free user always means "matchless," not "chose to leave a slot
+     * open" — unlike Pro, which can genuinely have spare capacity by
+     * choice. Called from DashboardScreen so a free user with nothing
+     * active goes straight into the searching flow instead of sitting on an
+     * empty "Start a new connection" screen requiring an extra tap. */
+    fun autoSearchIfFreeAndEmpty() {
+        if (activeMatchIds.isEmpty() && subscriptionStatus?.isPro != true) {
+            step = Step.Searching
+            beginSearching()
+        }
+    }
+
     private fun beginSearching() {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
@@ -252,6 +266,9 @@ class AppState : ViewModel() {
     suspend fun loadOwnProfile() {
         try {
             ownProfile = Backend.fetchOwnProfile()
+            ownProfile?.photoPath?.let { path ->
+                ownPhotoURL = runCatching { Backend.ownPhotoURL(path) }.getOrNull()
+            }
         } catch (e: Exception) {
             errorMessage = e.message
         }

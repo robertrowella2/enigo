@@ -105,6 +105,14 @@ final class Backend: ObservableObject {
         return path
     }
 
+    /// The `photos` bucket is private — unlike a partner's photo (only
+    /// revealed via get-match-state's signed URL once unlocked), the owner
+    /// can always read their own via the "photos: owner can read own"
+    /// storage policy, so this goes straight to Storage, no edge function.
+    func ownPhotoURL(path: String) async throws -> URL {
+        try await client.storage.from("photos").createSignedURL(path: path, expiresIn: 300)
+    }
+
     // MARK: - Matching / chat mechanic
 
     func findMatch() async throws -> FindMatchResponse {

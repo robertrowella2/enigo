@@ -67,6 +67,12 @@ fun SettingsScreen(appState: AppState) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 8.dp)) {
                 Eyebrow("Notifications")
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("New matches", fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.bodySize)
+                    Switch(checked = profile.notifyMatches, onCheckedChange = { v ->
+                        scope.launch { appState.patchProfile(ProfilePatch(notifyMatches = v)) }
+                    })
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("Messages", fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.bodySize)
                     Switch(checked = profile.notifyMessages, onCheckedChange = { v ->
                         scope.launch { appState.patchProfile(ProfilePatch(notifyMessages = v)) }

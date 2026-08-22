@@ -9,6 +9,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -136,6 +138,29 @@ fun SelectableChip(text: String, selected: Boolean, onClick: () -> Unit) {
             color = if (selected) EnigoColor.accent(dark) else EnigoColor.body(dark),
             fontFamily = EnigoFont.frauncesFamily(500),
             fontSize = EnigoFont.chipLabelSize
+        )
+    }
+}
+
+/** A user's own photo as a circular thumbnail, falling back to a generic
+ * silhouette while it's loading or if none was ever added. `url` is a
+ * short-lived signed URL (see Backend.ownPhotoURL) — never persisted, just
+ * fetched fresh each time the screen that shows it appears. */
+@Composable
+fun ProfileAvatar(url: String?, size: androidx.compose.ui.unit.Dp = 28.dp) {
+    val dark = isSystemInDarkTheme()
+    if (url != null) {
+        coil.compose.AsyncImage(
+            model = url,
+            contentDescription = "Profile photo",
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            modifier = Modifier.size(size).clip(CircleShape)
+        )
+    } else {
+        Icon(
+            Icons.Filled.AccountCircle, contentDescription = "Profile photo",
+            tint = EnigoColor.body(dark),
+            modifier = Modifier.size(size)
         )
     }
 }

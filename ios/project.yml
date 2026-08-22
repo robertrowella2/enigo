@@ -40,6 +40,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         DEVELOPMENT_TEAM: "J4D83S2UGB"
         CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Enigo/Enigo.entitlements
     scheme:
       # Lets the paywall's StoreKit 2 calls resolve products locally without
       # an App Store Connect account — see Enigo/Products.storekit.

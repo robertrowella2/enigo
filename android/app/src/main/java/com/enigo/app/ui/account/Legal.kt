@@ -61,8 +61,11 @@ object LegalContent {
             "Enigo offers optional paid features (an ongoing subscription tier and one-time boosts), billed through Google Play. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period, and are managed through your Google account settings, not within the app. Prices are shown at time of purchase and may vary by region. No refunds are provided by Enigo directly; refund requests go through Google Play per its standard policies."
         ),
         LegalSection(
-            "Safety",
-            "Enigo is not a background-check or identity-verification service. Use good judgment when meeting anyone in person, meet in public places, and tell a friend where you're going. Report any user who makes you feel unsafe."
+            "Safety and Meeting in Person",
+            "Enigo is not a background-check, identity-verification, or safety-screening service, and we do not investigate, endorse, or guarantee any user. You are solely responsible for your own safety and conduct in your interactions with other users, including any decision to communicate outside the app or to meet someone in person.\n\n" +
+                "If you choose to meet another user in person, you do so entirely at your own risk. We strongly recommend meeting in a public place, telling a friend or family member where you're going and who you're meeting, arranging your own transportation, and never sending money or financial information to someone you haven't met in person and verified.\n\n" +
+                "To the fullest extent permitted by law, Enigo and its operators are not responsible or liable for the conduct of any user, on or off the app, and are not liable for any injury, loss, or damage of any kind — including personal injury, death, or property loss — arising from your interactions with other users or from meeting in person, including if someone's identity, statements, or conduct turns out to be different from what they represented in the app.\n\n" +
+                "Report any user who makes you feel unsafe, and contact local law enforcement immediately if you are ever in danger."
         ),
         LegalSection(
             "Termination",
@@ -74,7 +77,7 @@ object LegalContent {
         ),
         LegalSection(
             "Limitation of Liability",
-            "To the maximum extent permitted by law, Enigo and its operators are not liable for indirect, incidental, or consequential damages arising from your use of the app, including your interactions with other users or with the AI-assisted matching feature described above."
+            "To the fullest extent permitted by law, Enigo and its operators are not liable for any indirect, incidental, special, or consequential damages, or for any injury, death, or loss of any kind, arising from your use of the app — including your interactions with other users, any in-person meeting arranged through the app, or the AI-assisted matching feature described above. This applies whether the claim is based on warranty, contract, tort (including negligence), or any other legal theory, and whether or not Enigo has been advised of the possibility of such damages."
         ),
         LegalSection(
             "Governing Law",

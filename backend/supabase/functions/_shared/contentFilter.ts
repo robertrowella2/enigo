@@ -22,6 +22,42 @@ export function checkMessageContent(text: string): ContentBlockReason | null {
   return null;
 }
 
+/**
+ * Returns the digits in `text` if the message reads like a deliberate
+ * fragment of a phone number rather than an ordinary sentence that happens
+ * to contain a number ("I'm 28", "back in 2024") — a message counts as a
+ * fragment when it has at least 2 digits and digits make up most of its
+ * non-space content. Used to catch someone splitting a phone number across
+ * several messages ("720" / "980" / "1520") to dodge the single-message
+ * PHONE_REGEX check above.
+ */
+function digitFragment(text: string): string | null {
+  const digits = text.replace(/\D/g, "");
+  if (digits.length < 2) return null;
+  const nonSpace = text.replace(/\s/g, "");
+  if (nonSpace.length === 0 || digits.length / nonSpace.length < 0.6) return null;
+  return digits;
+}
+
+/**
+ * True if `currentText`, appended to the sender's own recent digit-fragment
+ * messages in this match (oldest first, ordinary non-fragment messages in
+ * between are ignored rather than breaking the sequence), assembles into
+ * something long enough to be a real phone number (7+ digits — covers a
+ * bare 7-digit local number up through an 11-digit number with country
+ * code). Only ever triggers on a message that is itself a fragment, so a
+ * normal sentence is never blocked just because of someone's past history.
+ */
+export function checkFragmentedPhoneNumber(recentBodiesOldToNew: string[], currentText: string): boolean {
+  const current = digitFragment(currentText);
+  if (!current) return false;
+  const priorDigits = recentBodiesOldToNew
+    .map(digitFragment)
+    .filter((d): d is string => d !== null)
+    .join("");
+  return (priorDigits + current).length >= 7;
+}
+
 export function messageForBlockReason(reason: ContentBlockReason): string {
   return reason === "phone_number"
     ? "Messages can't include phone numbers — get to know each other here first."
