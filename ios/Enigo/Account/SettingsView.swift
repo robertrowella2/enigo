@@ -62,6 +62,11 @@ struct SettingsView: View {
                     .font(EnigoFont.body)
                     .foregroundStyle(EnigoColor.danger(scheme))
             }
+
+            section("LEGAL") {
+                SecondaryLink(title: "Terms of Service") { appState.presentedLegalDocument = .terms }
+                SecondaryLink(title: "Privacy Policy") { appState.presentedLegalDocument = .privacy }
+            }
         }
         .task { await appState.loadOwnProfile() }
     }

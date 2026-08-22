@@ -6,6 +6,7 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.Postgrest
@@ -16,6 +17,7 @@ import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.storage
 import io.ktor.client.call.body
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +29,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Thin wrapper around the Supabase client: auth, the profiles table, and the
@@ -44,12 +48,12 @@ import kotlinx.serialization.json.JsonNamingStrategy
  * broke onboarding on first run).
  */
 object Backend {
+    // Enigo's cloud Supabase project. (Previously "http://10.0.2.2:54321" —
     // 10.0.2.2 is the Android emulator's alias for the host machine's
-    // localhost — 127.0.0.1 on the emulator means the emulator itself, not
-    // the Mac running `supabase start`.
-    private const val SUPABASE_URL = "http://10.0.2.2:54321"
+    // localhost — for pointing at a local `supabase start` dev stack.)
+    private const val SUPABASE_URL = "https://szeiboavzjuembdwajfu.supabase.co"
     private const val ANON_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZWlib2F2emp1ZW1iZHdhamZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNTgzOTAsImV4cCI6MjEwMjkzNDM5MH0.3xMA02t-LVccJh4RYUL4I3ITBf4XiqUMKpXXebqUh5U"
 
     private val snakeCaseJson = Json {
         namingStrategy = JsonNamingStrategy.SnakeCase
@@ -238,6 +242,22 @@ object Backend {
     suspend fun signOut() {
         client.auth.signOut()
         _userId.value = null
+    }
+
+    /** Edge functions return `{ message, code }` on a non-2xx response (see
+     * e.g. send-message's content-blocked rejection) — this pulls that
+     * message out of the raw response body so the UI can show it instead
+     * of a generic exception string. */
+    suspend fun friendlyMessage(error: Throwable): String {
+        if (error is RestException) {
+            try {
+                val body = error.response.bodyAsText()
+                val message = Json.parseToJsonElement(body).jsonObject["message"]?.jsonPrimitive?.content
+                if (message != null) return message
+            } catch (_: Exception) {
+            }
+        }
+        return error.message ?: "Something went wrong"
     }
 }
 

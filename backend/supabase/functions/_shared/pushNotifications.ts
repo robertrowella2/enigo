@@ -17,7 +17,13 @@ function base64url(input: Uint8Array | string): string {
 
 async function importPemKey(pem: string, algorithm: EcKeyImportParams | RsaHashedImportParams): Promise<CryptoKey> {
   const der = Uint8Array.from(
-    atob(pem.replace(/-----BEGIN PRIVATE KEY-----/, "").replace(/-----END PRIVATE KEY-----/, "").replace(/\s/g, "")),
+    atob(
+      pem
+        .replace(/-----BEGIN PRIVATE KEY-----/, "")
+        .replace(/-----END PRIVATE KEY-----/, "")
+        .replace(/\\n/g, "")
+        .replace(/\s/g, ""),
+    ),
     (c) => c.charCodeAt(0),
   );
   return crypto.subtle.importKey("pkcs8", der, algorithm, false, ["sign"]);

@@ -40,6 +40,7 @@ final class AppState: ObservableObject {
     @Published var step: Step = .introSlide(0)
     @Published var errorMessage: String?
     @Published var isBusy = false
+    @Published var presentedLegalDocument: LegalDocument?
 
     // Onboarding draft — persisted to the backend in one upsert once
     // notification permission is resolved (see `completeOnboarding`).

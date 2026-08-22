@@ -11,7 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.enigo.app.ui.account.DeleteAccountConfirmScreen
+import com.enigo.app.ui.account.LegalScreen
 import com.enigo.app.ui.account.PaywallScreen
 import com.enigo.app.ui.account.ProfileScreen
 import com.enigo.app.ui.account.SettingsScreen
@@ -83,5 +86,14 @@ fun RootView(appState: AppState) {
             title = { Text("Something went wrong") },
             text = { Text(message) }
         )
+    }
+
+    appState.presentedLegalDocument?.let { document ->
+        Dialog(
+            onDismissRequest = { appState.presentedLegalDocument = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            LegalScreen(document) { appState.presentedLegalDocument = null }
+        }
     }
 }

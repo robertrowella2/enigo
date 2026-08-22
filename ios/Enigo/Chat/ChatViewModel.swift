@@ -8,6 +8,7 @@ final class ChatViewModel: ObservableObject {
     @Published var isSending = false
     @Published var celebrationField: UnlockField?
     @Published var showKnownSheet = false
+    @Published var errorMessage: String?
 
     private var matchId: UUID?
     private var pollTask: Task<Void, Never>?
@@ -61,11 +62,17 @@ final class ChatViewModel: ObservableObject {
     func send() {
         guard let matchId, !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         let text = draft
-        draft = ""
         isSending = true
         Task {
-            try? await backend.sendMessage(matchId: matchId, body: text)
-            await refresh()
+            do {
+                try await backend.sendMessage(matchId: matchId, body: text)
+                draft = ""
+                await refresh()
+            } catch {
+                // Leave the draft in place — e.g. a blocked message (phone
+                // number, photo link) shouldn't force the user to retype it.
+                errorMessage = Backend.friendlyMessage(from: error)
+            }
             isSending = false
         }
     }

@@ -28,6 +28,26 @@ struct PhoneView: View {
             ) {
                 Task { await appState.submitPhone() }
             }
+
+            consentLine
         }
+    }
+
+    private var consentLine: some View {
+        HStack(spacing: 4) {
+            Text("By continuing, you agree to our")
+                .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+            Text("Terms")
+                .underline()
+                .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.75))
+                .onTapGesture { appState.presentedLegalDocument = .terms }
+            Text("and")
+                .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+            Text("Privacy Policy.")
+                .underline()
+                .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.75))
+                .onTapGesture { appState.presentedLegalDocument = .privacy }
+        }
+        .font(EnigoFont.meta)
     }
 }

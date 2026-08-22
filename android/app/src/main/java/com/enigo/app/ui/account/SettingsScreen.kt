@@ -94,5 +94,11 @@ fun SettingsScreen(appState: AppState) {
                 modifier = Modifier.clickable { appState.openDeleteAccountConfirm() }
             )
         }
+
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 8.dp)) {
+            Eyebrow("Legal")
+            SecondaryLink("Terms of Service") { appState.presentedLegalDocument = LegalDocument.TERMS }
+            SecondaryLink("Privacy Policy") { appState.presentedLegalDocument = LegalDocument.PRIVACY }
+        }
     }
 }

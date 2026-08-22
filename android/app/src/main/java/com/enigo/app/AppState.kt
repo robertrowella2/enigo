@@ -12,6 +12,7 @@ import com.enigo.app.data.OwnProfile
 import com.enigo.app.data.ProfilePatch
 import com.enigo.app.data.SubscriptionStatus
 import com.enigo.app.data.UsernameGenerator
+import com.enigo.app.ui.account.LegalDocument
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,6 +55,7 @@ class AppState : ViewModel() {
     var step by mutableStateOf<Step>(Step.IntroSlide(0)); private set
     var errorMessage by mutableStateOf<String?>(null)
     var isBusy by mutableStateOf(false); private set
+    var presentedLegalDocument by mutableStateOf<LegalDocument?>(null)
 
     var phoneNumber by mutableStateOf("")
     var verifyCode by mutableStateOf("")

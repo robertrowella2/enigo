@@ -54,6 +54,11 @@ struct ChatView: View {
                 UnlockCelebrationView(field: field) { vm.celebrationField = nil }
             }
         }
+        .alert("Message not sent", isPresented: .constant(vm.errorMessage != nil), actions: {
+            Button("OK") { vm.errorMessage = nil }
+        }, message: {
+            Text(vm.errorMessage ?? "")
+        })
     }
 
     private var header: some View {

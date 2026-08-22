@@ -18,6 +18,7 @@ async function importApplePrivateKey(pem: string): Promise<CryptoKey> {
   const pkcs8 = pem
     .replace("-----BEGIN PRIVATE KEY-----", "")
     .replace("-----END PRIVATE KEY-----", "")
+    .replace(/\\n/g, "") // .env files often store a multi-line PEM as one line with literal \n
     .replace(/\s/g, "");
   const der = Uint8Array.from(atob(pkcs8), (c) => c.charCodeAt(0));
   return crypto.subtle.importKey("pkcs8", der, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);

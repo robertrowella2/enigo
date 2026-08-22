@@ -265,8 +265,13 @@ template = "Your code is {{ .Code }}"
 max_frequency = "5s"
 
 # Local-dev-only: fixed OTP for a test number so the phone-auth screens are
-# testable in Simulator without a real SMS provider. Remove once a real
-# provider (Twilio/MessageBird) is configured for a cloud project.
+# testable in Simulator without a real SMS provider.
+#
+# !! DANGER — DO NOT `supabase config push` WHILE THIS SECTION IS PRESENT !!
+# `config push` uploads this ENTIRE file to the linked cloud project,
+# including this hardcoded OTP bypass — that would let anyone sign in as
+# +15555550100 with code 123456 on the real, live project. If you ever need
+# to push config again, comment this block out first, push, then restore it.
 [auth.sms.test_otp]
 "15555550100" = "123456"
 
@@ -287,17 +292,20 @@ max_frequency = "5s"
 # enabled = true
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
 
-# Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
-# Local-dev-only: a provider must be "enabled" for phone login to turn on at
-# all, but these fake credentials are never actually used because every
-# number that will be tested locally is covered by [auth.sms.test_otp]
-# above, which short-circuits before any real request goes out. Configure a
-# real provider (with a real secret, from env) before shipping.
-[auth.sms.twilio]
+# Real Twilio account — used for any phone number that isn't the
+# [auth.sms.test_otp] test number above (locally, that's still a
+# shortcut; on the cloud project, every number goes through here for real).
+#
+# Uses Twilio Verify (not plain Twilio SMS) because a brand-new local
+# Twilio number is blocked from sending plain SMS to US numbers by carrier
+# A2P 10DLC filtering (Twilio error 30034) unless it goes through a paid,
+# multi-day business campaign registration. Twilio Verify is a
+# purpose-built OTP product that's exempt from that requirement.
+[auth.sms.twilio_verify]
 enabled = true
-account_sid = "AC00000000000000000000000000000000"
-message_service_sid = "MG00000000000000000000000000000000"
-auth_token = "fake-unused-token-covered-by-test-otp"
+account_sid = "env(TWILIO_ACCOUNT_SID)"
+message_service_sid = "VAd837b79eea9b9a3400b4a488723d03c3"
+auth_token = "env(TWILIO_AUTH_TOKEN)"
 
 # Multi-factor-authentication is available to Supabase Pro plan.
 [auth.mfa]

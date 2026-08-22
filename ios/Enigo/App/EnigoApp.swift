@@ -74,6 +74,9 @@ struct RootView: View {
             }
         }
         .task { await appState.bootstrap() }
+        .sheet(item: $appState.presentedLegalDocument) { document in
+            LegalView(document: document)
+        }
         .alert("Something went wrong", isPresented: .constant(appState.errorMessage != nil), actions: {
             Button("OK") { appState.errorMessage = nil }
         }, message: {

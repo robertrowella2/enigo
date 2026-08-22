@@ -28,6 +28,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.enigo.app.AppState
 import com.enigo.app.data.ContentData
+import com.enigo.app.ui.account.LegalDocument
 import com.enigo.app.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -79,6 +80,25 @@ fun PhoneScreen(appState: AppState) {
             disabled = appState.phoneNumber.length < 8,
             isLoading = appState.isBusy
         ) { scope.launch { appState.submitPhone() } }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("By continuing, you agree to our", color = EnigoColor.fgAlpha(dark, 0.5f), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize)
+            Text(
+                "Terms",
+                color = EnigoColor.fgAlpha(dark, 0.75f),
+                fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize,
+                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                modifier = Modifier.clickable { appState.presentedLegalDocument = LegalDocument.TERMS }
+            )
+            Text("and", color = EnigoColor.fgAlpha(dark, 0.5f), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize)
+            Text(
+                "Privacy Policy.",
+                color = EnigoColor.fgAlpha(dark, 0.75f),
+                fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize,
+                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                modifier = Modifier.clickable { appState.presentedLegalDocument = LegalDocument.PRIVACY }
+            )
+        }
     }
 }
 

@@ -6,6 +6,7 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { recordMessage, checkAndApplyUnlocks, generateAiReply, UnlockField } from "../_shared/mechanic.ts";
 import { sendPushToUser } from "../_shared/pushNotifications.ts";
+import { checkMessageContent, messageForBlockReason } from "../_shared/contentFilter.ts";
 
 const MAX_LEN = 2000;
 
@@ -18,6 +19,11 @@ export default {
     const text = typeof body === "string" ? body.trim() : "";
     if (!text || text.length > MAX_LEN) {
       return Response.json({ message: "Invalid message body", code: "invalid_body" }, { status: 400 });
+    }
+
+    const blockReason = checkMessageContent(text);
+    if (blockReason) {
+      return Response.json({ message: messageForBlockReason(blockReason), code: "content_blocked" }, { status: 400 });
     }
 
     const { data: match, error: matchError } = await admin

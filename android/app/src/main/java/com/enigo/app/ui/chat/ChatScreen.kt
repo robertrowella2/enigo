@@ -44,6 +44,7 @@ fun ChatScreen(appState: AppState, matchId: String) {
     var showKnownSheet by remember { mutableStateOf(false) }
     var celebrationField by remember { mutableStateOf<UnlockField?>(null) }
     var previouslyUnlocked by remember { mutableStateOf(setOf<String>()) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
     suspend fun refresh() {
@@ -73,13 +74,16 @@ fun ChatScreen(appState: AppState, matchId: String) {
     fun send() {
         val text = draft.trim()
         if (text.isEmpty()) return
-        draft = ""
         isSending = true
         scope.launch {
             try {
                 Backend.sendMessage(matchId, text)
+                draft = ""
                 refresh()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                // Leave the draft in place — e.g. a blocked message (phone
+                // number, photo link) shouldn't force the user to retype it.
+                errorMessage = Backend.friendlyMessage(e)
             }
             isSending = false
         }
@@ -179,6 +183,17 @@ fun ChatScreen(appState: AppState, matchId: String) {
 
     celebrationField?.let { field ->
         UnlockCelebration(field) { celebrationField = null }
+    }
+
+    errorMessage?.let { message ->
+        AlertDialog(
+            onDismissRequest = { errorMessage = null },
+            confirmButton = {
+                TextButton(onClick = { errorMessage = null }) { Text("OK") }
+            },
+            title = { Text("Message not sent") },
+            text = { Text(message) }
+        )
     }
 }
 

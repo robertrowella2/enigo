@@ -76,28 +76,50 @@ async function main() {
   const found1 = await callFunction("find-match", user1.accessToken, {});
   assert.equal(found1.status, 200, JSON.stringify(found1));
   assert.equal(found1.json.matchIds.length, 1, "free tier should hold exactly one match");
-  const matchId = found1.json.matchIds[0];
-  console.log("  matched:", matchId);
+  const aiMatchId = found1.json.matchIds[0];
+  console.log("  matched:", aiMatchId);
 
-  const { data: matchRow } = await admin.from("matches").select("is_ai_match").eq("id", matchId).single();
+  const { data: matchRow } = await admin.from("matches").select("is_ai_match").eq("id", aiMatchId).single();
   assert.equal(matchRow.is_ai_match, true, "first match should be the AI persona (no real candidates exist yet)");
 
   console.log("Confirming free tier can't get a second concurrent match while one is active...");
   const stillOne = await callFunction("find-match", user1.accessToken, {});
-  assert.deepEqual(stillOne.json.matchIds, [matchId], "free tier find-match should be a no-op with a slot already full");
+  assert.deepEqual(stillOne.json.matchIds, [aiMatchId], "free tier find-match should be a no-op with a slot already full");
+
+  console.log("Creating user2, a real mutual candidate, and confirming user1 gets upgraded off the AI match...");
+  const user2 = await createTestUser("user2@smoke.test", "smoke_user2", { gender: "man" });
+  const upgrade = await callFunction("find-match", user1.accessToken, {});
+  assert.equal(upgrade.status, 200, JSON.stringify(upgrade));
+  const matchId = upgrade.json.matchIds[0];
+  assert.notEqual(matchId, aiMatchId, "user1 should be moved to a new, real match");
+  const { data: newMatchRow } = await admin.from("matches").select("is_ai_match, status").eq("id", matchId).single();
+  assert.equal(newMatchRow.is_ai_match, false, "the upgraded match should be with the real user, not the AI persona");
+  const { data: oldMatchRow } = await admin.from("matches").select("status, end_reason").eq("id", aiMatchId).single();
+  assert.equal(oldMatchRow.status, "ended", "the AI match should be closed out once a real match exists");
+  assert.equal(oldMatchRow.end_reason, "upgraded_to_real");
 
   console.log("Driving messages past every threshold (interests=12, bio=30, location=55, photo=90 heavy messages)...");
   const heavyMessage = "x".repeat(45); // >= 40 chars => "heavy"
   const seenUnlocks = [];
+  // Both participants send their own scripted heavy messages directly,
+  // rather than relying on the AI persona's live replies for one side's
+  // counter — a real Claude reply's length naturally varies with what it's
+  // replying to (and gets noticeably terser over dozens of exchanges with
+  // meaningless repeated-character input), which the old fixed canned
+  // fallback never did. This section is testing the threshold mechanic
+  // itself, which should stay deterministic regardless of AI behavior —
+  // AI-bootstrap and AI-to-real upgrade are already covered above.
   for (let i = 0; i < 95; i++) {
-    const sent = await callFunction("send-message", user1.accessToken, { matchId, body: `${heavyMessage} ${i}` });
-    assert.equal(sent.status, 200, JSON.stringify(sent));
+    const sent1 = await callFunction("send-message", user1.accessToken, { matchId, body: `${heavyMessage} 1-${i}` });
+    assert.equal(sent1.status, 200, JSON.stringify(sent1));
+    const sent2 = await callFunction("send-message", user2.accessToken, { matchId, body: `${heavyMessage} 2-${i}` });
+    assert.equal(sent2.status, 200, JSON.stringify(sent2));
     const { data: unlocks } = await admin.from("unlocks").select("field").eq("match_id", matchId);
     const fields = unlocks.map((u) => u.field);
     for (const f of fields) {
       if (!seenUnlocks.includes(f)) {
         seenUnlocks.push(f);
-        console.log(`  unlocked after ${i + 1} heavy messages: ${f}`);
+        console.log(`  unlocked after ${i + 1} heavy messages each: ${f}`);
       }
     }
     if (seenUnlocks.length === 4) break;
@@ -120,24 +142,12 @@ async function main() {
   const { data: counterLeak, error: counterErr } = await scoped.from("match_counters").select("*").eq("match_id", matchId);
   assert.ok((counterLeak ?? []).length === 0 || counterErr, "match_counters must not be selectable by a client");
 
-  console.log("Creating user2, a real mutual candidate, and confirming user1 gets upgraded off the AI match...");
-  const user2 = await createTestUser("user2@smoke.test", "smoke_user2", { gender: "man" });
-  const upgrade = await callFunction("find-match", user1.accessToken, {});
-  assert.equal(upgrade.status, 200, JSON.stringify(upgrade));
-  const upgradedMatchId = upgrade.json.matchIds[0];
-  assert.notEqual(upgradedMatchId, matchId, "user1 should be moved to a new, real match");
-  const { data: newMatchRow } = await admin.from("matches").select("is_ai_match, status").eq("id", upgradedMatchId).single();
-  assert.equal(newMatchRow.is_ai_match, false, "the upgraded match should be with the real user, not the AI persona");
-  const { data: oldMatchRow } = await admin.from("matches").select("status, end_reason").eq("id", matchId).single();
-  assert.equal(oldMatchRow.status, "ended", "the AI match should be closed out once a real match exists");
-  assert.equal(oldMatchRow.end_reason, "upgraded_to_real");
-
   console.log("Soft-exiting (\"This isn't quite it\") consumes a free rematch credit...");
   const { data: beforeCredits } = await admin.from("profiles").select("rematch_credits").eq("id", user1.userId).single();
-  const softExit = await callFunction("end-match", user1.accessToken, { matchId: upgradedMatchId });
+  const softExit = await callFunction("end-match", user1.accessToken, { matchId });
   assert.equal(softExit.status, 200, JSON.stringify(softExit));
   assert.equal(softExit.json.rematchCreditsRemaining, beforeCredits.rematch_credits - 1);
-  const { data: exitedMatch } = await admin.from("matches").select("status, end_reason").eq("id", upgradedMatchId).single();
+  const { data: exitedMatch } = await admin.from("matches").select("status, end_reason").eq("id", matchId).single();
   assert.equal(exitedMatch.status, "ended");
   assert.equal(exitedMatch.end_reason, "soft_exit");
 
@@ -165,12 +175,19 @@ async function main() {
   assert.ok(blockRow, "reported pair should be permanently blocked from rematching");
 
   console.log("Recording a Pro purchase raises the concurrent-match cap to 3...");
-  const purchase = await callFunction("record-purchase", user1.accessToken, {
+  // This step tests the Pro-tier match-capacity behavior, not purchase
+  // verification (which now genuinely calls Apple's/Google's real servers —
+  // see _shared/appStoreServerApi.ts / playDeveloperApi.ts, already
+  // verified separately against a real Apple account). A fake transaction
+  // id would correctly get rejected by record-purchase now, so this writes
+  // the resulting subscription row directly via the admin client instead.
+  const { error: subError } = await admin.from("subscriptions").upsert({
+    user_id: user1.userId,
+    tier: "pro",
     platform: "ios",
-    productId: "pro_monthly",
-    transactionId: "test-txn-1",
+    status: "active",
   });
-  assert.equal(purchase.status, 200, JSON.stringify(purchase));
+  assert.equal(subError, null, `subscription upsert failed: ${subError?.message}`);
   const user4 = await createTestUser("user4@smoke.test", "smoke_user4", { gender: "man" });
   const user5 = await createTestUser("user5@smoke.test", "smoke_user5", { gender: "man" });
   const user6 = await createTestUser("user6@smoke.test", "smoke_user6", { gender: "man" });

@@ -10,16 +10,17 @@ import Supabase
 final class Backend: ObservableObject {
     static let shared = Backend()
 
-    /// Local Supabase dev stack (`supabase start` in backend/). Point this
-    /// at a cloud project's URL/anon key for a real deployment.
+    /// Enigo's cloud Supabase project. (Previously pointed at the local
+    /// `supabase start` dev stack at 127.0.0.1 — swap back to that for
+    /// local-only testing.)
     ///
     /// The SDK's default PostgREST encoder/decoder do NOT convert between
     /// Swift's camelCase and Postgres's snake_case column names (unlike the
     /// Auth client's decoder) — so a custom encoder/decoder pair is
     /// required here, or every table struct would need explicit CodingKeys.
     private let client = SupabaseClient(
-        supabaseURL: URL(string: "http://127.0.0.1:54321")!,
-        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
+        supabaseURL: URL(string: "https://szeiboavzjuembdwajfu.supabase.co")!,
+        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZWlib2F2emp1ZW1iZHdhamZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNTgzOTAsImV4cCI6MjEwMjkzNDM5MH0.3xMA02t-LVccJh4RYUL4I3ITBf4XiqUMKpXXebqUh5U",
         options: .init(db: .init(encoder: Backend.makeEncoder(), decoder: Backend.makeDecoder()))
     )
 
@@ -213,6 +214,19 @@ final class Backend: ObservableObject {
 
     func registerDeviceToken(token: String) async throws {
         try await client.functions.invoke("register-device-token", options: .init(body: DeviceTokenBody(platform: "ios", token: token)))
+    }
+
+    /// Edge functions return `{ message, code }` on a non-2xx response (see
+    /// e.g. send-message's content-blocked rejection) — this pulls that
+    /// message out of the raw error so the UI can show it instead of a
+    /// generic "non-2xx status code" string.
+    static func friendlyMessage(from error: Error) -> String {
+        if case let FunctionsError.httpError(_, data) = error,
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let message = json["message"] as? String {
+            return message
+        }
+        return error.localizedDescription
     }
 }
 

@@ -19,6 +19,7 @@ async function importGooglePrivateKey(pem: string): Promise<CryptoKey> {
   const pkcs8 = pem
     .replace("-----BEGIN PRIVATE KEY-----", "")
     .replace("-----END PRIVATE KEY-----", "")
+    .replace(/\\n/g, "")
     .replace(/\s/g, "");
   const der = Uint8Array.from(atob(pkcs8), (c) => c.charCodeAt(0));
   return crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
