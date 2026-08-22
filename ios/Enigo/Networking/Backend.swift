@@ -1,0 +1,257 @@
+import Foundation
+import Supabase
+
+/// Thin wrapper around the Supabase client: auth, the profiles table, and
+/// the four edge functions that implement the core mechanic (find-match,
+/// send-message, get-match-state — see backend/supabase/functions). A
+/// client never talks to match_counters/unlock_thresholds directly; those
+/// have no grant at all, by design.
+@MainActor
+final class Backend: ObservableObject {
+    static let shared = Backend()
+
+    /// Local Supabase dev stack (`supabase start` in backend/). Point this
+    /// at a cloud project's URL/anon key for a real deployment.
+    ///
+    /// The SDK's default PostgREST encoder/decoder do NOT convert between
+    /// Swift's camelCase and Postgres's snake_case column names (unlike the
+    /// Auth client's decoder) — so a custom encoder/decoder pair is
+    /// required here, or every table struct would need explicit CodingKeys.
+    private let client = SupabaseClient(
+        supabaseURL: URL(string: "http://127.0.0.1:54321")!,
+        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
+        options: .init(db: .init(encoder: Backend.makeEncoder(), decoder: Backend.makeDecoder()))
+    )
+
+    private static func makeEncoder() -> JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }
+
+    private static func makeDecoder() -> JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let string = try container.decode(String.self)
+            for options: ISO8601DateFormatter.Options in [
+                [.withInternetDateTime, .withFractionalSeconds],
+                [.withInternetDateTime],
+            ] {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = options
+                if let date = formatter.date(from: string) { return date }
+            }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date: \(string)")
+        }
+        return decoder
+    }
+
+    @Published var userId: UUID?
+
+    private init() {
+        Task {
+            for await (event, session) in client.auth.authStateChanges {
+                _ = event
+                userId = session?.user.id
+            }
+        }
+    }
+
+    // MARK: - Auth (phone OTP — matches the design's "no passwords" model)
+
+    func requestOTP(phone: String) async throws {
+        try await client.auth.signInWithOTP(phone: phone)
+    }
+
+    func verifyOTP(phone: String, code: String) async throws {
+        try await client.auth.verifyOTP(phone: phone, token: code, type: .sms)
+        userId = try await client.auth.session.user.id
+    }
+
+    // MARK: - Profile (onboarding)
+
+    func fetchOwnProfile() async throws -> OwnProfile? {
+        guard let userId else { return nil }
+        let rows: [OwnProfile] = try await client
+            .from("profiles")
+            .select()
+            .eq("id", value: userId.uuidString)
+            .execute()
+            .value
+        return rows.first
+    }
+
+    func upsertProfile(_ profile: OnboardingProfile) async throws {
+        try await client.from("profiles").upsert(profile).execute()
+    }
+
+    func patchProfile(_ patch: ProfilePatch) async throws {
+        guard let userId else { throw BackendError.notSignedIn }
+        try await client.from("profiles").update(patch).eq("id", value: userId.uuidString).execute()
+    }
+
+    func uploadPhoto(data: Data, fileName: String) async throws -> String {
+        guard let userId else { throw BackendError.notSignedIn }
+        // Postgres's auth.uid()::text is lowercase; Swift's UUID.uuidString is
+        // uppercase. The storage RLS policy compares the path's folder name
+        // against auth.uid(), so this must be lowercased or every upload is
+        // silently denied.
+        let path = "\(userId.uuidString.lowercased())/\(fileName)"
+        try await client.storage.from("photos").upload(path, data: data, options: .init(upsert: true))
+        return path
+    }
+
+    // MARK: - Matching / chat mechanic
+
+    func findMatch() async throws -> FindMatchResponse {
+        try await client.functions.invoke("find-match", options: .init(body: EmptyBody()))
+    }
+
+    func sendMessage(matchId: UUID, body: String) async throws {
+        try await client.functions.invoke(
+            "send-message",
+            options: .init(body: SendMessageBody(matchId: matchId, body: body))
+        )
+    }
+
+    func getMatchState(matchId: UUID) async throws -> MatchStateResponse {
+        try await client.functions.invoke(
+            "get-match-state",
+            options: .init(body: MatchIdBody(matchId: matchId))
+        )
+    }
+
+    /// Polled every few seconds by ChatViewModel. A later pass can replace
+    /// this with a Realtime subscription on `messages`/`unlocks`.
+    func listMessages(matchId: UUID) async throws -> [ChatMessage] {
+        try await client
+            .from("messages")
+            .select()
+            .eq("match_id", value: matchId.uuidString)
+            .order("created_at", ascending: true)
+            .execute()
+            .value
+    }
+
+    /// All of the caller's currently-active matches (for the connections
+    /// dashboard) — a direct RLS-scoped table read, not an edge function.
+    func listActiveMatchIds() async throws -> [UUID] {
+        struct Row: Decodable { var id: UUID }
+        let rows: [Row] = try await client
+            .from("matches")
+            .select("id")
+            .eq("status", value: "active")
+            .execute()
+            .value
+        return rows.map(\.id)
+    }
+
+    // MARK: - Report / soft-exit
+
+    func endMatch(matchId: UUID, reason: String?) async throws -> EndMatchResponse {
+        try await client.functions.invoke("end-match", options: .init(body: EndMatchBody(matchId: matchId, reason: reason)))
+    }
+
+    func submitReport(matchId: UUID, category: String, detail: String?) async throws {
+        try await client.functions.invoke(
+            "submit-report",
+            options: .init(body: ReportBody(matchId: matchId, category: category, detail: detail))
+        )
+    }
+
+    // MARK: - Pro / subscription
+
+    func getSubscriptionStatus() async throws -> SubscriptionStatus {
+        guard let userId else { throw BackendError.notSignedIn }
+        let rows: [SubscriptionStatus] = try await client
+            .from("subscriptions")
+            .select("tier, status")
+            .eq("user_id", value: userId.uuidString)
+            .execute()
+            .value
+        return rows.first ?? SubscriptionStatus(tier: "free", status: "active")
+    }
+
+    func recordPurchase(productId: String, transactionId: String, currentPeriodEnd: Date?) async throws {
+        try await client.functions.invoke(
+            "record-purchase",
+            options: .init(body: PurchaseBody(
+                platform: "ios", productId: productId, transactionId: transactionId,
+                currentPeriodEnd: currentPeriodEnd.map { ISO8601DateFormatter().string(from: $0) }
+            ))
+        )
+    }
+
+    func redeemBoost(productId: String, transactionId: String) async throws {
+        try await client.functions.invoke(
+            "redeem-boost",
+            options: .init(body: PurchaseBody(platform: "ios", productId: productId, transactionId: transactionId, currentPeriodEnd: nil))
+        )
+    }
+
+    // MARK: - Account
+
+    func exportAccountData() async throws -> Data {
+        try await client.functions.invoke("export-account-data", options: .init(body: EmptyBody())) { data, _ in data }
+    }
+
+    func deleteAccount() async throws {
+        try await client.functions.invoke("delete-account", options: .init(body: EmptyBody()))
+        try await client.auth.signOut()
+        userId = nil
+    }
+
+    func signOut() async throws {
+        try await client.auth.signOut()
+        userId = nil
+    }
+
+    // MARK: - Push
+
+    func registerDeviceToken(token: String) async throws {
+        try await client.functions.invoke("register-device-token", options: .init(body: DeviceTokenBody(platform: "ios", token: token)))
+    }
+}
+
+enum BackendError: Error, LocalizedError {
+    case notSignedIn
+    case purchaseUnverified
+
+    var errorDescription: String? {
+        switch self {
+        case .notSignedIn: "Not signed in"
+        case .purchaseUnverified: "Apple couldn't verify that purchase"
+        }
+    }
+}
+
+private struct EmptyBody: Encodable {}
+private struct SendMessageBody: Encodable {
+    var matchId: UUID
+    var body: String
+}
+private struct MatchIdBody: Encodable {
+    var matchId: UUID
+}
+private struct EndMatchBody: Encodable {
+    var matchId: UUID
+    var reason: String?
+}
+private struct DeviceTokenBody: Encodable {
+    var platform: String
+    var token: String
+}
+private struct ReportBody: Encodable {
+    var matchId: UUID
+    var category: String
+    var detail: String?
+}
+private struct PurchaseBody: Encodable {
+    var platform: String
+    var productId: String
+    var transactionId: String
+    var currentPeriodEnd: String?
+}

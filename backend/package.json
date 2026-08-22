@@ -1,0 +1,11 @@
+{
+  "name": "enigo-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:smoke": "node test/smoke.mjs"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2"
+  }
+}

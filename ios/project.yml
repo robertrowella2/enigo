@@ -1,0 +1,44 @@
+name: Enigo
+options:
+  bundleIdPrefix: com.enigo
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: 2.0.0
+targets:
+  Enigo:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Enigo
+    resources:
+      - path: Enigo/Resources
+    dependencies:
+      - package: Supabase
+        product: Supabase
+    info:
+      path: Enigo/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UIAppFonts:
+          - Fraunces.ttf
+          - Inter.ttf
+        NSLocationWhenInUseUsageDescription: "Enigo ranks matches by distance and reveals a rough area once you and your match have both shown up. Your exact location is never shared."
+        NSPhotoLibraryUsageDescription: "Choose a photo to have ready for graduation — it stays hidden until then."
+        NSUserNotificationsUsageDescription: "Enigo lets you know about new messages and unlock moments only."
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.enigo.app
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_STYLE: Automatic
+    scheme:
+      # Lets the paywall's StoreKit 2 calls resolve products locally without
+      # an App Store Connect account — see Enigo/Products.storekit.
+      storeKitConfiguration: Enigo/Products.storekit

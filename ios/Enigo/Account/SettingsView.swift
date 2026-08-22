@@ -1,0 +1,77 @@
+import SwiftUI
+
+/// Settings — Identity, Matching (LGBTQ+ preference, location, radius,
+/// "Order: closest first"), Notifications (messages/unlocks, everything
+/// else off always), Account.
+struct SettingsView: View {
+    @EnvironmentObject private var appState: AppState
+    @Environment(\.colorScheme) private var scheme
+    private let radii = [25, 50, 100]
+    private let communityOptions = [
+        ("in_community", "Match me inside the community"),
+        ("open", "It matters but I'm open either way"),
+        ("not_looking", "Not what I'm looking for"),
+        ("rather_not_say", "Rather not say"),
+    ]
+
+    var body: some View {
+        EnigoScreen {
+            HStack {
+                Button(action: { appState.openDashboard() }) {
+                    Image(systemName: "chevron.left").foregroundStyle(EnigoColor.body(scheme))
+                }
+                Spacer()
+            }
+            ScreenTitle(text: "Settings")
+
+            if let profile = appState.ownProfile {
+                section("MATCHING") {
+                    ForEach(communityOptions, id: \.0) { value, label in
+                        SelectableRow(text: label, selected: profile.community == value) {
+                            Task { await appState.patchProfile(ProfilePatch(community: value)) }
+                        }
+                    }
+                    Text("Order: closest first").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                    HStack(spacing: 8) {
+                        ForEach(radii, id: \.self) { radius in
+                            SelectableChip(text: "\(radius) km", selected: profile.radiusKm == radius) {
+                                Task { await appState.patchProfile(ProfilePatch(radiusKm: radius)) }
+                            }
+                        }
+                    }
+                }
+
+                section("NOTIFICATIONS") {
+                    Toggle(isOn: Binding(
+                        get: { profile.notifyMessages },
+                        set: { v in Task { await appState.patchProfile(ProfilePatch(notifyMessages: v)) } }
+                    )) { Text("Messages").font(EnigoFont.body) }
+                    Toggle(isOn: Binding(
+                        get: { profile.notifyUnlocks },
+                        set: { v in Task { await appState.patchProfile(ProfilePatch(notifyUnlocks: v)) } }
+                    )) { Text("Unlock moments").font(EnigoFont.body) }
+                    Text("Everything else — Off, always").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                }
+            }
+
+            section("ACCOUNT") {
+                SecondaryLink(title: "Subscription") { appState.openSubscription() }
+                SecondaryLink(title: "Sign-in help") { appState.step = .signInHelp }
+                SecondaryLink(title: "Sign out") { Task { await appState.signOut() } }
+                Button("Delete account") { appState.step = .deleteAccountConfirm }
+                    .font(EnigoFont.body)
+                    .foregroundStyle(EnigoColor.danger(scheme))
+            }
+        }
+        .task { await appState.loadOwnProfile() }
+    }
+
+    @ViewBuilder
+    private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Eyebrow(text: title)
+            content()
+        }
+        .padding(.top, 8)
+    }
+}
