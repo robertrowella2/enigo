@@ -13,14 +13,17 @@ import com.enigo.app.data.ProfilePatch
 import com.enigo.app.data.SubscriptionStatus
 import com.enigo.app.data.UsernameGenerator
 import com.enigo.app.ui.account.LegalDocument
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 sealed class Step {
     data class IntroSlide(val index: Int) : Step()
     object Phone : Step()
     object Verify : Step()
+    object Name : Step()
     object Photo : Step()
     object Interests : Step()
     object Bio : Step()
@@ -59,7 +62,10 @@ class AppState : ViewModel() {
 
     var phoneNumber by mutableStateOf("")
     var verifyCode by mutableStateOf("")
-    val username = UsernameGenerator.generate()
+    var username by mutableStateOf(UsernameGenerator.generate())
+    var firstName by mutableStateOf("")
+    var lastName by mutableStateOf("")
+    var usernameError by mutableStateOf<String?>(null)
     var photoBytes by mutableStateOf<ByteArray?>(null)
     var selectedInterests by mutableStateOf(setOf<String>())
     var bio by mutableStateOf("")
@@ -127,8 +133,36 @@ class AppState : ViewModel() {
         if (runCatching { Backend.fetchOwnProfile() }.getOrNull() != null) {
             openDashboard()
         } else {
-            step = Step.Photo
+            step = Step.Name
         }
+    }
+
+    /** Mirrors the database trigger (`enforce_username_privacy`): a
+     * username may not contain the user's own first or last name, checked
+     * case-insensitively and ignoring anything but letters/digits, so the
+     * user sees the problem immediately instead of only after the server
+     * rejects it. */
+    fun validateUsername(): Boolean {
+        fun normalize(s: String) = s.lowercase().filter { it.isLetterOrDigit() }
+        val normalizedUsername = normalize(username)
+        val normalizedFirst = normalize(firstName)
+        val normalizedLast = normalize(lastName)
+        if (normalizedFirst.isNotEmpty() && normalizedUsername.contains(normalizedFirst)) {
+            usernameError = "Username can't contain your first name"
+            return false
+        }
+        if (normalizedLast.isNotEmpty() && normalizedUsername.contains(normalizedLast)) {
+            usernameError = "Username can't contain your last name"
+            return false
+        }
+        usernameError = null
+        return true
+    }
+
+    fun submitName() {
+        if (firstName.trim().isEmpty() || lastName.trim().isEmpty() || username.trim().isEmpty()) return
+        if (!validateUsername()) return
+        step = Step.Photo
     }
 
     fun submitPhoto() { step = Step.Interests }
@@ -164,6 +198,8 @@ class AppState : ViewModel() {
         val profile = OnboardingProfile(
             id = uid,
             username = username,
+            firstName = firstName,
+            lastName = lastName,
             gender = gender,
             genderSelfDescription = genderSelfDescription.ifEmpty { null },
             matchWith = matchWith.toList(),
@@ -204,6 +240,12 @@ class AppState : ViewModel() {
             while (true) {
                 try {
                     val result = Backend.findMatch()
+                    // Cancellation only takes effect at the next suspend
+                    // point, so a search that was already superseded by a
+                    // fresh beginSearching() call can still resume here
+                    // after the fact — re-check before committing its
+                    // result to shared state.
+                    if (!isActive) return@launch
                     val id = result.matchIds.firstOrNull()
                     if (id != null) {
                         revealedMatchId = id
@@ -211,6 +253,8 @@ class AppState : ViewModel() {
                         step = Step.MatchReveal
                         return@launch
                     }
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     errorMessage = e.message
                 }

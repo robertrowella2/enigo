@@ -1,12 +1,47 @@
 // Reporting always ends the match immediately and permanently excludes that
-// pair from rematching. "A human reads every report" (out of scope here —
-// this just records it and locks the pair; a moderation queue/notification
-// is a separate ops surface, per the handoff doc's "Not yet designed").
+// pair from rematching, and emails an alert so a human actually sees it.
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { endMatch } from "../_shared/matches.ts";
 
 const CATEGORIES = ["harassment", "inappropriate_content", "fake_profile", "money", "other"];
+
+/** Best-effort — a report is already recorded and the match already ended
+ * by the time this runs, so an email hiccup shouldn't fail the request. */
+async function sendReportAlertEmail(params: {
+  category: string;
+  detail: string | null;
+  reporterId: string;
+  partnerId: string;
+  matchId: string;
+}): Promise<void> {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  const to = Deno.env.get("REPORT_ALERT_EMAIL");
+  if (!apiKey || !to) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Enigo Reports <onboarding@resend.dev>",
+        to,
+        subject: `New Enigo report: ${params.category}`,
+        text: [
+          `Category: ${params.category}`,
+          `Detail: ${params.detail ?? "(none provided)"}`,
+          `Reporter: ${params.reporterId}`,
+          `Reported user: ${params.partnerId}`,
+          `Match: ${params.matchId}`,
+        ].join("\n"),
+      }),
+    });
+  } catch (_error) {
+    // Swallow — see comment above.
+  }
+}
 
 export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
@@ -47,6 +82,14 @@ export default {
       .from("blocked_pairs")
       .upsert({ user_a: callerId, user_b: partnerId, reason: "report" });
     if (blockError) throw blockError;
+
+    await sendReportAlertEmail({
+      category,
+      detail: detail ?? null,
+      reporterId: callerId,
+      partnerId,
+      matchId,
+    });
 
     return Response.json({ ok: true });
   }),

@@ -52,6 +52,7 @@ fun RootView(appState: AppState) {
         is Step.IntroSlide -> IntroScreen(appState, step.index)
         Step.Phone -> PhoneScreen(appState)
         Step.Verify -> VerifyScreen(appState)
+        Step.Name -> NameScreen(appState)
         Step.Photo -> PhotoScreen(appState)
         Step.Interests -> InterestsScreen(appState)
         Step.Bio -> BioScreen(appState)

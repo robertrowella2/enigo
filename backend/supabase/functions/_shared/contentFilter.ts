@@ -14,12 +14,32 @@ const PHONE_REGEX = /(\+?\d{1,2}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/;
 const IMAGE_URL_REGEX = /https?:\/\/\S+\.(jpe?g|png|gif|webp|heic|heif|bmp|svg|tiff?)(\?\S*)?/i;
 const DATA_IMAGE_REGEX = /data:image\/[a-z0-9.+-]+;base64,/i;
 
-export type ContentBlockReason = "phone_number" | "image_content";
+export type ContentBlockReason = "phone_number" | "image_content" | "last_name";
 
 export function checkMessageContent(text: string): ContentBlockReason | null {
   if (DATA_IMAGE_REGEX.test(text) || IMAGE_URL_REGEX.test(text)) return "image_content";
   if (PHONE_REGEX.test(text)) return "phone_number";
   return null;
+}
+
+/** Escapes a string for safe use inside a RegExp literal. */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * True if `text` says the sender's own last name, as a whole word
+ * (case-insensitive) — not just a substring, so a short last name like
+ * "Lee" doesn't false-positive inside "sleep". First name is deliberately
+ * NOT checked here: sharing it is allowed (it's the same thing the
+ * show_first_name toggle can already reveal), only the last name is kept
+ * out of chat entirely.
+ */
+export function checkOwnLastNameLeak(text: string, lastName: string | null): boolean {
+  const trimmed = lastName?.trim();
+  if (!trimmed) return false;
+  const pattern = new RegExp(`\\b${escapeRegExp(trimmed)}\\b`, "i");
+  return pattern.test(text);
 }
 
 /**
@@ -59,7 +79,12 @@ export function checkFragmentedPhoneNumber(recentBodiesOldToNew: string[], curre
 }
 
 export function messageForBlockReason(reason: ContentBlockReason): string {
-  return reason === "phone_number"
-    ? "Messages can't include phone numbers — get to know each other here first."
-    : "Messages can't include photos or images — those unlock in their own time.";
+  switch (reason) {
+    case "phone_number":
+      return "Messages can't include phone numbers — get to know each other here first.";
+    case "last_name":
+      return "Messages can't include your last name — first name only, for now.";
+    default:
+      return "Messages can't include photos or images — those unlock in their own time.";
+  }
 }

@@ -11,14 +11,19 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalTextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -127,6 +132,49 @@ fun VerifyScreen(appState: AppState) {
 }
 
 @Composable
+fun NameScreen(appState: AppState) {
+    val dark = isSystemInDarkTheme()
+    val canContinue = appState.firstName.isNotBlank() && appState.lastName.isNotBlank() && appState.username.isNotBlank()
+    EnigoScreen {
+        Eyebrow("Your name")
+        ScreenTitle("What's your name?")
+        Text(
+            "Your first name can be shared with a match later, if you choose to. Your last name is never shown to anyone — we just keep it out of your username and out of chat.",
+            color = EnigoColor.fgAlpha(dark, 0.62f), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.bodySize
+        )
+        OutlinedTextField(
+            value = appState.firstName,
+            onValueChange = { appState.firstName = it },
+            placeholder = { Text("First name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = appState.lastName,
+            onValueChange = { appState.lastName = it },
+            placeholder = { Text("Last name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Column {
+            Text("Username", color = EnigoColor.fgAlpha(dark, 0.5f), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize)
+            OutlinedTextField(
+                value = appState.username,
+                onValueChange = { appState.username = it; appState.usernameError = null },
+                placeholder = { Text("Username") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text("This is what a match sees — no real names here.", color = EnigoColor.fgAlpha(dark, 0.45f), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize)
+            appState.usernameError?.let {
+                Text(it, color = EnigoColor.danger(dark), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize)
+            }
+        }
+        Spacer(Modifier.height(20.dp))
+        PrimaryButton(title = "Continue", disabled = !canContinue) {
+            appState.submitName()
+        }
+    }
+}
+
+@Composable
 fun PhotoScreen(appState: AppState) {
     val dark = isSystemInDarkTheme()
     val context = LocalContext.current
@@ -181,27 +229,90 @@ fun PhotoScreen(appState: AppState) {
 fun InterestsScreen(appState: AppState) {
     val dark = isSystemInDarkTheme()
     val minimum = 3
+    var searchText by remember { mutableStateOf("") }
+
+    val popularInterests = ContentData.interests.take(10)
+    val filteredInterests = if (searchText.isEmpty()) {
+        popularInterests
+    } else {
+        ContentData.interests.filter { it.contains(searchText, ignoreCase = true) }
+    }
+
     EnigoScreen {
         Eyebrow("Step 2 of 3")
         ScreenTitle("What do you like?")
         Text("Pick at least three — more if you like. These unlock first, so they're the first real thing your match learns about you.", color = EnigoColor.fgAlpha(dark, 0.62f), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.bodySize)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(EnigoRadius.input.dp))
+                .background(EnigoColor.fgAlpha(dark, 0.06f))
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = EnigoColor.fgAlpha(dark, 0.4f),
+                modifier = Modifier.size(18.dp)
+            )
+            TextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                placeholder = { Text("Search or browse", fontSize = EnigoFont.bodySize, color = EnigoColor.fgAlpha(dark, 0.4f)) },
+                modifier = Modifier
+                    .weight(1f)
+                    .background(Color.Transparent),
+                textStyle = LocalTextStyle.current.copy(fontSize = EnigoFont.bodySize),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                singleLine = true
+            )
+            if (searchText.isNotEmpty()) {
+                IconButton(onClick = { searchText = "" }, modifier = Modifier.size(24.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                        tint = EnigoColor.fgAlpha(dark, 0.4f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+
         Text("${appState.selectedInterests.size} chosen", color = EnigoColor.accent(dark), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize)
 
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 90.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.height(420.dp)
-        ) {
-            items(ContentData.interests) { tag ->
-                SelectableChip(text = tag, selected = appState.selectedInterests.contains(tag)) {
-                    appState.selectedInterests = if (appState.selectedInterests.contains(tag)) {
-                        appState.selectedInterests - tag
-                    } else {
-                        appState.selectedInterests + tag
+        if (filteredInterests.isNotEmpty()) {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 90.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.height(420.dp)
+            ) {
+                items(filteredInterests) { tag ->
+                    SelectableChip(text = tag, selected = appState.selectedInterests.contains(tag)) {
+                        appState.selectedInterests = if (appState.selectedInterests.contains(tag)) {
+                            appState.selectedInterests - tag
+                        } else {
+                            appState.selectedInterests + tag
+                        }
                     }
                 }
             }
+        } else {
+            Text(
+                "No interests match your search",
+                color = EnigoColor.fgAlpha(dark, 0.5f),
+                fontFamily = EnigoFont.interFamily(400),
+                fontSize = EnigoFont.metaSize,
+                modifier = Modifier.padding(vertical = 40.dp)
+            )
         }
 
         val remaining = (minimum - appState.selectedInterests.size).coerceAtLeast(0)

@@ -7,6 +7,7 @@ enum Step: Equatable {
     case introSlide(Int)
     case phone
     case verify
+    case name
     case photo
     case interests
     case bio
@@ -47,7 +48,10 @@ final class AppState: ObservableObject {
     // notification permission is resolved (see `completeOnboarding`).
     @Published var phoneNumber = ""
     @Published var verifyCode = ""
-    var username = UsernameGenerator.generate()
+    @Published var username = UsernameGenerator.generate()
+    @Published var firstName = ""
+    @Published var lastName = ""
+    @Published var usernameError: String?
     @Published var photoData: Data?
     var photoFileName: String?
     @Published var selectedInterests: Set<String> = []
@@ -140,9 +144,41 @@ final class AppState: ObservableObject {
             if (try? await self.backend.fetchOwnProfile()) != nil {
                 self.openDashboard()
             } else {
-                self.step = .photo
+                self.step = .name
             }
         }
+    }
+
+    /// True if `username` (normalized: lowercased, letters/digits only) contains
+    /// `firstName` or `lastName` the same way normalized — mirrors the
+    /// database trigger (`enforce_username_privacy`) so the user sees the
+    /// problem immediately instead of only after the server rejects it.
+    func validateUsername() -> Bool {
+        func normalize(_ s: String) -> String {
+            String(s.lowercased().filter { $0.isLetter || $0.isNumber })
+        }
+        let normalizedUsername = normalize(username)
+        let normalizedFirst = normalize(firstName)
+        let normalizedLast = normalize(lastName)
+        if !normalizedFirst.isEmpty && normalizedUsername.contains(normalizedFirst) {
+            usernameError = "Username can't contain your first name"
+            return false
+        }
+        if !normalizedLast.isEmpty && normalizedUsername.contains(normalizedLast) {
+            usernameError = "Username can't contain your last name"
+            return false
+        }
+        usernameError = nil
+        return true
+    }
+
+    func submitName() {
+        guard !firstName.trimmingCharacters(in: .whitespaces).isEmpty,
+              !lastName.trimmingCharacters(in: .whitespaces).isEmpty,
+              !username.trimmingCharacters(in: .whitespaces).isEmpty,
+              validateUsername()
+        else { return }
+        step = .photo
     }
 
     func submitPhoto() { step = .interests }
@@ -180,6 +216,8 @@ final class AppState: ObservableObject {
             let profile = OnboardingProfile(
                 id: userId,
                 username: self.username,
+                firstName: self.firstName,
+                lastName: self.lastName,
                 gender: self.gender,
                 genderSelfDescription: self.genderSelfDescription.isEmpty ? nil : self.genderSelfDescription,
                 matchWith: Array(self.matchWith),
@@ -222,6 +260,12 @@ final class AppState: ObservableObject {
             while !Task.isCancelled {
                 do {
                     let result = try await backend.findMatch()
+                    // Cancelling searchTask doesn't abort this in-flight
+                    // call (Swift's task cancellation is cooperative), so a
+                    // search that was already superseded by a fresh
+                    // beginSearching() can still resolve here after the
+                    // fact — re-check before committing its result.
+                    guard !Task.isCancelled else { return }
                     if let id = result.matchIds.first {
                         revealedMatchId = id
                         activeMatchIds = result.matchIds

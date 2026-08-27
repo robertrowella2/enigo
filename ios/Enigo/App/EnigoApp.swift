@@ -25,6 +25,8 @@ struct RootView: View {
                 PhoneView()
             case .verify:
                 VerifyView()
+            case .name:
+                NameView()
             case .photo:
                 PhotoView()
             case .interests:

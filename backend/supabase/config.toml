@@ -264,14 +264,17 @@ template = "Your code is {{ .Code }}"
 # Controls the minimum amount of time that must pass before sending another sms otp.
 max_frequency = "5s"
 
-# Local-dev-only: fixed OTP for a test number so the phone-auth screens are
-# testable in Simulator without a real SMS provider.
-#
-# !! DANGER — DO NOT `supabase config push` WHILE THIS SECTION IS PRESENT !!
-# `config push` uploads this ENTIRE file to the linked cloud project,
-# including this hardcoded OTP bypass — that would let anyone sign in as
-# +15555550100 with code 123456 on the real, live project. If you ever need
-# to push config again, comment this block out first, push, then restore it.
+# Fixed OTP for a test number — used for local dev (no real SMS provider
+# needed in Simulator) AND, deliberately, on the live cloud project as the
+# Apple App Review demo account: reviewers can't receive a real text, so
+# this number/code goes in App Store Connect's "App Review Information"
+# notes as the sign-in to use. +1 555-0100 is in the NANP's reserved
+# fictional-number block (555-0100 through 555-0199), never a real
+# subscriber, so this can't affect anyone. It only ever grants access to
+# this one ordinary, unprivileged account — same trade-off as any fixed
+# demo-account credential, and intentionally live in this file. Pushed to
+# the cloud project on purpose; do not remove without checking whether
+# review is still relying on it.
 [auth.sms.test_otp]
 "15555550100" = "123456"
 
