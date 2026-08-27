@@ -36,7 +36,7 @@ struct AgeVerificationView: View {
             ) {
                 if isOldEnough(selectedDate) {
                     appState.birthdate = selectedDate
-                    appState.step = .questions
+                    appState.step = .introSlide(0)
                 } else {
                     errorMessage = "You must be at least 18 years old."
                 }
