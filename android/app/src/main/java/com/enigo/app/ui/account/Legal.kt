@@ -21,7 +21,7 @@ data class LegalSection(val heading: String, val body: String)
 
 object LegalContent {
     const val lastUpdated = "August 22, 2026"
-    const val contactEmail = "robertrowella2@gmail.com"
+    const val contactEmail = "enigoapp@gmail.com"
 
     fun sections(document: LegalDocument): List<LegalSection> = when (document) {
         LegalDocument.TERMS -> termsSections

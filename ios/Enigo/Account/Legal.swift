@@ -35,7 +35,7 @@ struct LegalSection: Identifiable {
 
 enum LegalContent {
     static let lastUpdated = "August 22, 2026"
-    static let contactEmail = "robertrowella2@gmail.com"
+    static let contactEmail = "enigoapp@gmail.com"
 
     static let termsSections: [LegalSection] = [
         LegalSection(heading: "Eligibility", body:
