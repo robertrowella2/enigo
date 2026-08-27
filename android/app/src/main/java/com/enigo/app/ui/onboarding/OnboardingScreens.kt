@@ -208,14 +208,29 @@ fun PhoneScreen(appState: AppState) {
         OutlinedTextField(
             value = appState.phoneNumber,
             onValueChange = { appState.phoneNumber = it },
-            placeholder = { Text("15555550100") },
+            placeholder = { Text("(720) 980-1520") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth()
         )
+        // US numbers are assumed unless a '+' is typed, so show the number
+        // that will actually be dialled — a wrong country code is much
+        // cheaper to catch here than after a text never lands.
+        if (appState.phoneDisplay.isNotEmpty()) {
+            Text(
+                "We'll text ${appState.phoneDisplay}",
+                color = EnigoColor.fgAlpha(dark, 0.5f),
+                fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize
+            )
+            Text(
+                "Outside the US? Start with + and your country code.",
+                color = EnigoColor.fgAlpha(dark, 0.4f),
+                fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize
+            )
+        }
         Spacer(Modifier.height(20.dp))
         PrimaryButton(
             title = "Send code",
-            disabled = appState.phoneNumber.length < 8,
+            disabled = appState.normalizedPhone.length < 10,
             isLoading = appState.isBusy
         ) { scope.launch { appState.submitPhone() } }
 

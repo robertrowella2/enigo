@@ -124,10 +124,30 @@ final class AppState: ObservableObject {
         }
     }
 
-    /// Digits only, no leading '+' — matches how the phone-auth test_otp
-    /// numbers are configured locally (see backend/supabase/config.toml).
-    private var normalizedPhone: String {
-        phoneNumber.filter(\.isNumber)
+    /// E.164 digits with no leading '+' — GoTrue strips the '+' anyway, and
+    /// the test_otp table is keyed on the bare digits (see
+    /// backend/supabase/config.toml).
+    ///
+    /// The country code is the part people leave off: almost everyone types
+    /// their own number the way they'd say it out loud ("720 980 1520"),
+    /// and forwarding those ten digits to Twilio unqualified gets the send
+    /// rejected. So a bare NANP-length number is assumed to be +1. An
+    /// explicit leading '+' means the user gave a country code themselves,
+    /// so it's taken as-is.
+    var normalizedPhone: String {
+        let digits = phoneNumber.filter(\.isNumber)
+        if phoneNumber.trimmingCharacters(in: .whitespaces).hasPrefix("+") { return digits }
+        return digits.count == 10 ? "1" + digits : digits
+    }
+
+    /// The number as it will actually be dialled, for the confirmation line
+    /// under the field — so a wrong country code is visible before sending
+    /// rather than after a text never arrives.
+    var phoneDisplay: String {
+        let d = normalizedPhone
+        guard d.count == 11, d.hasPrefix("1") else { return d.isEmpty ? "" : "+\(d)" }
+        let n = Array(d.dropFirst())
+        return "+1 \(String(n[0..<3])) \(String(n[3..<6])) \(String(n[6..<10]))"
     }
 
     func submitPhone() async {

@@ -120,7 +120,33 @@ class AppState : ViewModel() {
         }
     }
 
-    private val normalizedPhone: String get() = phoneNumber.filter { it.isDigit() }
+    /// E.164 digits with no leading '+' — GoTrue strips the '+' anyway, and
+    /// the test_otp table is keyed on the bare digits (see
+    /// backend/supabase/config.toml).
+    ///
+    /// The country code is the part people leave off: almost everyone types
+    /// their own number the way they'd say it out loud ("720 980 1520"),
+    /// and forwarding those ten digits to Twilio unqualified gets the send
+    /// rejected. So a bare NANP-length number is assumed to be +1. An
+    /// explicit leading '+' means the user gave a country code themselves,
+    /// so it's taken as-is.
+    val normalizedPhone: String
+        get() {
+            val digits = phoneNumber.filter { it.isDigit() }
+            if (phoneNumber.trim().startsWith("+")) return digits
+            return if (digits.length == 10) "1$digits" else digits
+        }
+
+    /// The number as it will actually be dialled, for the confirmation line
+    /// under the field — so a wrong country code is visible before sending
+    /// rather than after a text never arrives.
+    val phoneDisplay: String
+        get() {
+            val d = normalizedPhone
+            if (d.length != 11 || !d.startsWith("1")) return if (d.isEmpty()) "" else "+$d"
+            val n = d.drop(1)
+            return "+1 ${n.substring(0, 3)} ${n.substring(3, 6)} ${n.substring(6, 10)}"
+        }
 
     fun submitPhone() = run {
         Backend.requestOtp(normalizedPhone)
