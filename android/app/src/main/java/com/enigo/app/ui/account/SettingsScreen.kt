@@ -91,6 +91,7 @@ fun SettingsScreen(appState: AppState) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 8.dp)) {
             Eyebrow("Account")
             SecondaryLink("Subscription") { appState.openSubscription() }
+            SecondaryLink("Send feedback") { appState.step = com.enigo.app.Step.Feedback }
             SecondaryLink("Sign-in help") { appState.openSignInHelp() }
             SecondaryLink("Sign out") { scope.launch { appState.signOut() } }
             Text(

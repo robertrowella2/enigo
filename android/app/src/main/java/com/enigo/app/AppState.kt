@@ -41,6 +41,7 @@ sealed class Step {
     object Dashboard : Step()
     data class Chat(val matchId: String) : Step()
     data class Report(val matchId: String) : Step()
+    object Feedback : Step()
     data class SoftExit(val matchId: String) : Step()
     object Profile : Step()
     object Settings : Step()
@@ -298,6 +299,11 @@ class AppState : ViewModel() {
         Backend.submitReport(matchId, category, detail)
         refreshDashboard()
         step = Step.Dashboard
+    }
+
+    fun submitFeedback(message: String) = run {
+        Backend.submitFeedback(message)
+        step = Step.Settings
     }
 
     fun confirmSoftExit(matchId: String, reason: String?) = run {

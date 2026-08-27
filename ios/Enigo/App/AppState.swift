@@ -25,6 +25,7 @@ enum Step: Equatable {
     case dashboard
     case chat(UUID)
     case report(UUID)
+    case feedback
     case softExit(UUID)
     case profile
     case settings
@@ -321,6 +322,13 @@ final class AppState: ObservableObject {
             try await self.backend.submitReport(matchId: matchId, category: category, detail: detail)
             await self.refreshDashboard()
             self.step = .dashboard
+        }
+    }
+
+    func submitFeedback(message: String) async {
+        await run {
+            try await self.backend.submitFeedback(message: message)
+            self.step = .settings
         }
     }
 

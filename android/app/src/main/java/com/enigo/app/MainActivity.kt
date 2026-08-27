@@ -70,6 +70,7 @@ fun RootView(appState: AppState) {
         Step.Dashboard -> DashboardScreen(appState)
         is Step.Chat -> ChatScreen(appState, step.matchId)
         is Step.Report -> ReportScreen(appState, step.matchId)
+        Step.Feedback -> FeedbackScreen(appState)
         is Step.SoftExit -> SoftExitScreen(appState, step.matchId)
         Step.Profile -> ProfileScreen(appState)
         Step.Settings -> SettingsScreen(appState)

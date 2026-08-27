@@ -191,6 +191,7 @@ object Backend {
 
     @Serializable private data class ReportBody(val matchId: String, val category: String, val detail: String?)
     @Serializable private data class EndMatchBody(val matchId: String, val reason: String?)
+    @Serializable private data class FeedbackBody(val message: String)
 
     suspend fun endMatch(matchId: String, reason: String?): EndMatchResponse =
         client.functions.invoke("end-match") {
@@ -202,6 +203,13 @@ object Backend {
         client.functions.invoke("submit-report") {
             contentType(ContentType.Application.Json)
             setBody(ReportBody(matchId, category, detail))
+        }
+    }
+
+    suspend fun submitFeedback(message: String) {
+        client.functions.invoke("submit-feedback") {
+            contentType(ContentType.Application.Json)
+            setBody(FeedbackBody(message))
         }
     }
 

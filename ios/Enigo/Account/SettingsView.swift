@@ -84,6 +84,7 @@ struct SettingsView: View {
 
             section("ACCOUNT") {
                 SecondaryLink(title: "Subscription") { appState.openSubscription() }
+                SecondaryLink(title: "Send feedback") { appState.step = .feedback }
                 SecondaryLink(title: "Sign-in help") { appState.step = .signInHelp }
                 SecondaryLink(title: "Sign out") { Task { await appState.signOut() } }
                 Button("Delete account") { appState.step = .deleteAccountConfirm }

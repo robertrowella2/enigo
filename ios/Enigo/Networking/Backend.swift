@@ -171,6 +171,13 @@ final class Backend: ObservableObject {
         )
     }
 
+    func submitFeedback(message: String) async throws {
+        try await client.functions.invoke(
+            "submit-feedback",
+            options: .init(body: FeedbackBody(message: message))
+        )
+    }
+
     // MARK: - Pro / subscription
 
     func getSubscriptionStatus() async throws -> SubscriptionStatus {
@@ -273,6 +280,9 @@ private struct ReportBody: Encodable {
     var matchId: UUID
     var category: String
     var detail: String?
+}
+private struct FeedbackBody: Encodable {
+    var message: String
 }
 private struct PurchaseBody: Encodable {
     var platform: String

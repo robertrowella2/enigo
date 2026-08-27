@@ -61,6 +61,8 @@ struct RootView: View {
                 ChatView(matchId: matchId)
             case .report(let matchId):
                 ReportView(matchId: matchId)
+            case .feedback:
+                FeedbackView()
             case .softExit(let matchId):
                 SoftExitView(matchId: matchId)
             case .profile:
