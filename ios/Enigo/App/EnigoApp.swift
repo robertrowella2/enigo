@@ -63,6 +63,8 @@ struct RootView: View {
                 ReportView(matchId: matchId)
             case .feedback:
                 FeedbackView()
+            case .changePhone:
+                ChangePhoneView()
             case .softExit(let matchId):
                 SoftExitView(matchId: matchId)
             case .profile:

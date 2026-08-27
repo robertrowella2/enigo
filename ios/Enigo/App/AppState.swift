@@ -32,6 +32,7 @@ enum Step: Equatable {
     case paywall
     case subscription
     case signInHelp
+    case changePhone
     case deleteAccountConfirm
 }
 
@@ -348,6 +349,50 @@ final class AppState: ObservableObject {
     func submitFeedback(message: String) async {
         await run {
             try await self.backend.submitFeedback(message: message)
+            self.step = .settings
+        }
+    }
+
+    // MARK: - Changing the sign-in number
+
+    /// Kept separate from `phoneNumber`, which the onboarding flow owns —
+    /// reusing it would leave a half-typed new number sitting in the signup
+    /// draft.
+    @Published var newPhoneNumber = ""
+    @Published var phoneChangeCode = ""
+    @Published var phoneChangeCodeSent = false
+    @Published var currentPhone: String?
+
+    /// Same normalization as signup: bare NANP digits get +1, an explicit
+    /// '+' is trusted. Sending a raw 10-digit number here would fail the
+    /// same way signup did.
+    var normalizedNewPhone: String {
+        let digits = newPhoneNumber.filter(\.isNumber)
+        if newPhoneNumber.trimmingCharacters(in: .whitespaces).hasPrefix("+") { return digits }
+        return digits.count == 10 ? "1" + digits : digits
+    }
+
+    func loadCurrentPhone() async {
+        currentPhone = try? await backend.currentPhone()
+    }
+
+    func requestPhoneChange() async {
+        await run {
+            try await self.backend.requestPhoneChange(newPhone: self.normalizedNewPhone)
+            self.phoneChangeCodeSent = true
+        }
+    }
+
+    func confirmPhoneChange() async {
+        await run {
+            try await self.backend.confirmPhoneChange(
+                newPhone: self.normalizedNewPhone,
+                code: self.phoneChangeCode
+            )
+            self.newPhoneNumber = ""
+            self.phoneChangeCode = ""
+            self.phoneChangeCodeSent = false
+            await self.loadCurrentPhone()
             self.step = .settings
         }
     }

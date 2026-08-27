@@ -72,6 +72,24 @@ final class Backend: ObservableObject {
         userId = try await client.auth.session.user.id
     }
 
+    /// Moves the signed-in account onto a new number. Nothing in the database
+    /// is keyed on the phone — profiles.id is the auth user's UUID — so the
+    /// account, its matches and its subscription all survive untouched; only
+    /// the sign-in credential moves. Texts a code to the new number, which
+    /// `confirmPhoneChange` then redeems.
+    func requestPhoneChange(newPhone: String) async throws {
+        try await client.auth.update(user: UserAttributes(phone: newPhone))
+    }
+
+    func confirmPhoneChange(newPhone: String, code: String) async throws {
+        try await client.auth.verifyOTP(phone: newPhone, token: code, type: .phoneChange)
+    }
+
+    /// The number currently on the account, for display.
+    func currentPhone() async throws -> String? {
+        try await client.auth.session.user.phone
+    }
+
     // MARK: - Profile (onboarding)
 
     func fetchOwnProfile() async throws -> OwnProfile? {

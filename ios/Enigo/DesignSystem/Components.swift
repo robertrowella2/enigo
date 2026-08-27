@@ -18,6 +18,15 @@ struct EnigoScreen<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .background(EnigoColor.background(scheme).ignoresSafeArea())
+        // Scrolled content otherwise slides under the clock and battery with
+        // nothing behind it — on Settings the first row ends up printed
+        // through the status bar. A band of the page background pinned over
+        // the top inset keeps the status bar legible on every screen.
+        .overlay(alignment: .top) {
+            EnigoColor.background(scheme)
+                .frame(height: 0)
+                .ignoresSafeArea(edges: .top)
+        }
         .foregroundStyle(EnigoColor.body(scheme))
     }
 }
