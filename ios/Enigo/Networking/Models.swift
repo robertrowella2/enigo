@@ -7,6 +7,8 @@ import Foundation
 struct OnboardingProfile: Encodable {
     var id: UUID
     var username: String
+    var firstName: String
+    var lastName: String
     var gender: String?
     var genderSelfDescription: String?
     var matchWith: [String]
@@ -75,6 +77,8 @@ struct ChatMessage: Decodable, Identifiable {
     var isHeavy: Bool
     var isSystem: Bool
     var createdAt: Date
+    var gifUrl: String?
+    var photoUrl: String?
 }
 
 /// Own profile, as read back for Settings/Profile screens.

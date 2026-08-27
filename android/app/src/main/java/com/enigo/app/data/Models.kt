@@ -12,6 +12,8 @@ import kotlinx.serialization.Serializable
 data class OnboardingProfile(
     val id: String,
     val username: String,
+    val firstName: String,
+    val lastName: String,
     val gender: String? = null,
     val genderSelfDescription: String? = null,
     val matchWith: List<String>,
@@ -106,7 +108,9 @@ data class ChatMessage(
     val body: String,
     val isHeavy: Boolean = false,
     val isSystem: Boolean = false,
-    val createdAt: String
+    val createdAt: String,
+    val gifUrl: String? = null,
+    val photoUrl: String? = null
 )
 
 enum class UnlockField(val key: String) {

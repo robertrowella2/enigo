@@ -21,7 +21,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import coil.compose.AsyncImage
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.enigo.app.AppState
@@ -30,6 +32,8 @@ import com.enigo.app.data.ChatMessage
 import com.enigo.app.data.MatchStateResponse
 import com.enigo.app.data.UnlockField
 import com.enigo.app.ui.theme.*
+import com.enigo.app.Step
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -51,6 +55,7 @@ fun ChatScreen(appState: AppState, matchId: String) {
     var draft by remember { mutableStateOf("") }
     var isSending by remember { mutableStateOf(false) }
     var showKnownSheet by remember { mutableStateOf(false) }
+    var showGifPicker by remember { mutableStateOf(false) }
     var celebrationField by remember { mutableStateOf<UnlockField?>(null) }
     var previouslyUnlocked by remember { mutableStateOf(setOf<String>()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -59,6 +64,13 @@ fun ChatScreen(appState: AppState, matchId: String) {
     suspend fun refresh() {
         try {
             val activeIds = Backend.listActiveMatchIds()
+            // Coroutine cancellation only takes effect at the next suspend
+            // point, so a refresh() that was already superseded (screen
+            // navigated away, then back to a different chat) can still
+            // resume here after the fact. Bail out rather than acting on a
+            // stale result for a chat the user isn't even looking at
+            // anymore.
+            if (appState.step != Step.Chat(matchId)) return
             if (!activeIds.contains(matchId)) {
                 appState.openDashboard()
                 return
@@ -69,6 +81,8 @@ fun ChatScreen(appState: AppState, matchId: String) {
             matchState = state
             UnlockField.ORDER.firstOrNull { newlyUnlocked.contains(it.key) }?.let { celebrationField = it }
             previouslyUnlocked = state.unlocked.toSet()
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
         }
     }
@@ -113,6 +127,28 @@ fun ChatScreen(appState: AppState, matchId: String) {
                 // look like it sent, and shouldn't force the user to retype it.
                 messages = messages.filterNot { it.id == optimisticId }
                 draft = text
+                errorMessage = Backend.friendlyMessage(e)
+            }
+            isSending = false
+        }
+    }
+
+    fun sendGif(gifUrl: String) {
+        isSending = true
+        val optimisticId = java.util.UUID.randomUUID().toString()
+        val optimistic = ChatMessage(
+            id = optimisticId, matchId = matchId, senderId = Backend.userId.value,
+            body = "", isHeavy = false, isSystem = false,
+            createdAt = java.time.Instant.now().toString(), gifUrl = gifUrl
+        )
+        messages = messages + optimistic
+
+        scope.launch {
+            try {
+                Backend.sendMessage(matchId, "", optimisticId, gifUrl = gifUrl)
+                refresh()
+            } catch (e: Exception) {
+                messages = messages.filterNot { it.id == optimisticId }
                 errorMessage = Backend.friendlyMessage(e)
             }
             isSending = false
@@ -202,6 +238,16 @@ fun ChatScreen(appState: AppState, matchId: String) {
                 modifier = Modifier
                     .size(46.dp)
                     .clip(CircleShape)
+                    .background(EnigoColor.fgAlpha(dark, 0.1f))
+                    .clickable { showGifPicker = true },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("😊", fontSize = 20.sp)
+            }
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
                     .background(EnigoColor.primaryFill(dark))
                     .clickable(enabled = draft.isNotBlank() && !isSending) { send() },
                 contentAlignment = Alignment.Center
@@ -236,6 +282,18 @@ fun ChatScreen(appState: AppState, matchId: String) {
             text = { Text(message) }
         )
     }
+
+    if (showGifPicker) {
+        ModalBottomSheet(onDismissRequest = { showGifPicker = false }) {
+            GifPickerContent(
+                onSelectGif = { url ->
+                    sendGif(url)
+                    showGifPicker = false
+                },
+                onClose = { showGifPicker = false }
+            )
+        }
+    }
 }
 
 @Composable
@@ -255,13 +313,36 @@ private fun MessageBubble(message: ChatMessage, isMine: Boolean, dark: Boolean) 
                 modifier = Modifier
                     .clip(RoundedCornerShape(EnigoRadius.input.dp))
                     .background(if (isMine) EnigoColor.goldAlpha(dark, 0.14f) else EnigoColor.fgAlpha(dark, 0.06f))
-                    .padding(12.dp)
+                    .padding(8.dp)
                     .widthIn(max = 260.dp)
             ) {
-                Text(message.body, fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.chatMessageSize)
+                Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                    if (message.body.isNotEmpty()) {
+                        Text(message.body, fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.chatMessageSize, modifier = Modifier.padding(4.dp))
+                    }
+                    message.gifUrl?.let { url ->
+                        AsyncImageMedia(url)
+                    }
+                    message.photoUrl?.let { url ->
+                        AsyncImageMedia(url)
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+private fun AsyncImageMedia(url: String) {
+    AsyncImage(
+        model = url,
+        contentDescription = null,
+        modifier = Modifier
+            .widthIn(max = 200.dp)
+            .heightIn(max = 200.dp)
+            .clip(RoundedCornerShape(EnigoRadius.input.dp)),
+        contentScale = ContentScale.Crop
+    )
 }
 
 @Composable
@@ -361,3 +442,66 @@ private fun UnlockCelebration(field: UnlockField, onDismiss: () -> Unit) {
         }
     }
 }
+
+@Composable
+private fun GifPickerContent(onSelectGif: (String) -> Unit, onClose: () -> Unit) {
+    val dark = isSystemInDarkTheme()
+    var searchText by remember { mutableStateOf("") }
+    var gifs by remember { mutableStateOf(listOf<GifData>()) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(EnigoColor.sheetBase(dark))
+            .padding(EnigoSpacing.screenHorizontal.dp)
+    ) {
+        TextField(
+            value = searchText,
+            onValueChange = { searchText = it },
+            placeholder = { Text("Search GIFs...") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 24.dp))
+        } else if (gifs.isEmpty() && searchText.isNotEmpty()) {
+            Text(
+                "No GIFs found",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 24.dp),
+                color = EnigoColor.fgAlpha(dark, 0.5f)
+            )
+        } else if (gifs.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(gifs) { gif ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .clip(RoundedCornerShape(EnigoRadius.input.dp))
+                            .clickable { onSelectGif(gif.url) }
+                    ) {
+                        AsyncImage(
+                            model = gif.thumbUrl,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+    }
+}
+
+data class GifData(val url: String, val thumbUrl: String)

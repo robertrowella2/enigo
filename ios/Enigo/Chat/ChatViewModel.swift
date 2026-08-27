@@ -49,9 +49,18 @@ final class ChatViewModel: ObservableObject {
 
     func refresh() async {
         guard let matchId else { return }
-        if let upgrade = try? await backend.findMatch(), !upgrade.matchIds.contains(matchId) {
-            onMatchEnded?()
-            return
+        if let upgrade = try? await backend.findMatch() {
+            // Swift's task cancellation is cooperative: cancelling pollTask
+            // doesn't abort an in-flight await, so a poll that was already
+            // superseded (e.g. this view model got reconfigured for a new
+            // match) can still resolve here after the fact. Bail out
+            // silently rather than firing onMatchEnded for a match that's
+            // no longer the one this instance is even polling for.
+            guard !Task.isCancelled, self.matchId == matchId else { return }
+            if !upgrade.matchIds.contains(matchId) {
+                onMatchEnded?()
+                return
+            }
         }
         if let newMessages = try? await backend.listMessages(matchId: matchId) {
             messages = newMessages
@@ -100,6 +109,30 @@ final class ChatViewModel: ObservableObject {
                 messages.removeAll { $0.id == optimistic.id }
                 draft = text
                 sendGeneration += 1
+                errorMessage = Backend.friendlyMessage(from: error)
+            }
+            isSending = false
+        }
+    }
+
+    func sendGif(url: String) {
+        guard let matchId else { return }
+        isSending = true
+
+        let messageId = UUID()
+        let optimistic = ChatMessage(
+            id: messageId, matchId: matchId, senderId: backend.userId,
+            body: "", isHeavy: false, isSystem: false, createdAt: Date(),
+            gifUrl: url, photoUrl: nil
+        )
+        messages.append(optimistic)
+
+        Task {
+            do {
+                try await backend.sendMessage(matchId: matchId, body: "", clientMessageId: messageId, gifUrl: url)
+                await refresh()
+            } catch {
+                messages.removeAll { $0.id == optimistic.id }
                 errorMessage = Backend.friendlyMessage(from: error)
             }
             isSending = false

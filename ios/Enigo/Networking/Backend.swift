@@ -119,10 +119,10 @@ final class Backend: ObservableObject {
         try await client.functions.invoke("find-match", options: .init(body: EmptyBody()))
     }
 
-    func sendMessage(matchId: UUID, body: String, clientMessageId: UUID) async throws {
+    func sendMessage(matchId: UUID, body: String, clientMessageId: UUID, gifUrl: String? = nil, photoUrl: String? = nil) async throws {
         try await client.functions.invoke(
             "send-message",
-            options: .init(body: SendMessageBody(matchId: matchId, body: body, clientMessageId: clientMessageId))
+            options: .init(body: SendMessageBody(matchId: matchId, body: body, clientMessageId: clientMessageId, gifUrl: gifUrl, photoUrl: photoUrl))
         )
     }
 
@@ -255,6 +255,8 @@ private struct SendMessageBody: Encodable {
     var matchId: UUID
     var body: String
     var clientMessageId: UUID
+    var gifUrl: String?
+    var photoUrl: String?
 }
 private struct MatchIdBody: Encodable {
     var matchId: UUID

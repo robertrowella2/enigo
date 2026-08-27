@@ -136,7 +136,13 @@ object Backend {
     suspend fun ownPhotoURL(path: String): String =
         client.storage.from("photos").createSignedUrl(path, 5.minutes)
 
-    @Serializable private data class SendMessageBody(val matchId: String, val body: String, val clientMessageId: String)
+    @Serializable private data class SendMessageBody(
+        val matchId: String,
+        val body: String,
+        val clientMessageId: String,
+        val gifUrl: String? = null,
+        val photoUrl: String? = null
+    )
     @Serializable private data class MatchIdBody(val matchId: String)
 
     suspend fun findMatch(): FindMatchResponse =
@@ -145,10 +151,10 @@ object Backend {
             setBody(emptyMap<String, String>())
         }.body()
 
-    suspend fun sendMessage(matchId: String, body: String, clientMessageId: String) {
+    suspend fun sendMessage(matchId: String, body: String, clientMessageId: String, gifUrl: String? = null, photoUrl: String? = null) {
         client.functions.invoke("send-message") {
             contentType(ContentType.Application.Json)
-            setBody(SendMessageBody(matchId, body, clientMessageId))
+            setBody(SendMessageBody(matchId, body, clientMessageId, gifUrl, photoUrl))
         }
     }
 

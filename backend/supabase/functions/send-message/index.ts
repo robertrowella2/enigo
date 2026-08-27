@@ -6,7 +6,12 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { recordMessage, checkAndApplyUnlocks, generateAiReply, UnlockField } from "../_shared/mechanic.ts";
 import { sendPushToUser } from "../_shared/pushNotifications.ts";
-import { checkMessageContent, checkFragmentedPhoneNumber, messageForBlockReason } from "../_shared/contentFilter.ts";
+import {
+  checkMessageContent,
+  checkFragmentedPhoneNumber,
+  checkOwnLastNameLeak,
+  messageForBlockReason,
+} from "../_shared/contentFilter.ts";
 
 const MAX_LEN = 2000;
 
@@ -14,11 +19,32 @@ export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     const callerId = ctx.userClaims!.id;
     const admin = ctx.supabaseAdmin;
-    const { matchId, body, clientMessageId } = await req.json();
+    const { matchId, body, clientMessageId, gifUrl, photoUrl } = await req.json();
 
     const text = typeof body === "string" ? body.trim() : "";
-    if (!text || text.length > MAX_LEN) {
+    const gif = typeof gifUrl === "string" ? gifUrl.trim() : "";
+    const photo = typeof photoUrl === "string" ? photoUrl.trim() : "";
+
+    if (!text && !gif && !photo) {
+      return Response.json({ message: "Message must have text, GIF, or photo", code: "invalid_body" }, { status: 400 });
+    }
+    if (text.length > MAX_LEN) {
       return Response.json({ message: "Invalid message body", code: "invalid_body" }, { status: 400 });
+    }
+
+    if (gif && !isValidGifUrl(gif)) {
+      return Response.json({ message: "Invalid GIF source", code: "invalid_gif" }, { status: 400 });
+    }
+
+    if (photo) {
+      const { data: unlocks } = await admin.from("unlocks").select("field").eq("match_id", matchId);
+      const hasPhotoAccess = unlocks?.some((u: { field: string }) => u.field === "photo") ?? false;
+      if (!hasPhotoAccess) {
+        return Response.json(
+          { message: "Photo sharing not yet unlocked", code: "photo_locked" },
+          { status: 403 },
+        );
+      }
     }
 
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -27,6 +53,14 @@ export default {
     const blockReason = checkMessageContent(text);
     if (blockReason) {
       return Response.json({ message: messageForBlockReason(blockReason), code: "content_blocked" }, { status: 400 });
+    }
+
+    const { data: sender } = await admin.from("profiles").select("last_name").eq("id", callerId).single();
+    if (checkOwnLastNameLeak(text, sender?.last_name ?? null)) {
+      return Response.json(
+        { message: messageForBlockReason("last_name"), code: "content_blocked" },
+        { status: 400 },
+      );
     }
 
     const { data: match, error: matchError } = await admin
@@ -61,7 +95,7 @@ export default {
       );
     }
 
-    await recordMessage(admin, matchId, callerId, text, { id: messageId });
+    await recordMessage(admin, matchId, callerId, text, { id: messageId, gifUrl: gif || undefined, photoUrl: photo || undefined });
     const unlockedField: UnlockField | null = await checkAndApplyUnlocks(admin, matchId);
 
     if (unlockedField) {
@@ -121,5 +155,17 @@ async function generateAiReplyAndNotify(admin: any, matchId: string, aiUserId: s
     }
   } catch (e) {
     console.error("AI reply generation failed:", e);
+  }
+}
+
+function isValidGifUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    return hostname === "media.giphy.com" ||
+           hostname === "giphy.com" ||
+           hostname === "www.giphy.com";
+  } catch {
+    return false;
   }
 }

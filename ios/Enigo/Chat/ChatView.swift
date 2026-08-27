@@ -5,6 +5,7 @@ struct ChatView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var scheme
     @StateObject private var vm = ChatViewModel()
+    @State private var showGifPicker = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -46,7 +47,14 @@ struct ChatView: View {
         .background(EnigoColor.background(scheme).ignoresSafeArea())
         .foregroundStyle(EnigoColor.body(scheme))
         .task {
-            vm.onMatchEnded = { appState.openDashboard() }
+            // Guard against a stale poll from an outdated ChatViewModel
+            // state (see ChatViewModel.refresh) ever navigating away from
+            // whatever chat the user is actually looking at right now.
+            vm.onMatchEnded = {
+                if appState.step == .chat(matchId) {
+                    appState.openDashboard()
+                }
+            }
             vm.configure(matchId: matchId)
         }
         .sheet(isPresented: $vm.showKnownSheet) {
@@ -66,6 +74,11 @@ struct ChatView: View {
         }, message: {
             Text(vm.errorMessage ?? "")
         })
+        .sheet(isPresented: $showGifPicker) {
+            GifPickerView { url in
+                vm.sendGif(url: url)
+            }
+        }
     }
 
     private var lastMineId: UUID? {
@@ -119,6 +132,13 @@ struct ChatView: View {
                 .font(EnigoFont.chatMessage)
                 .padding(12)
                 .background(RoundedRectangle(cornerRadius: EnigoRadius.input).fill(EnigoColor.fgAlpha(scheme, 0.06)))
+            Button(action: { showGifPicker = true }) {
+                Image(systemName: "smiley")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 46, height: 46)
+                    .background(Circle().fill(EnigoColor.fgAlpha(scheme, 0.1)))
+                    .foregroundStyle(EnigoColor.body(scheme))
+            }
             Button(action: vm.send) {
                 Image(systemName: "arrow.up")
                     .font(.system(size: 16, weight: .semibold))
@@ -146,13 +166,61 @@ private struct MessageBubble: View {
         } else {
             HStack {
                 if isMine { Spacer(minLength: 40) }
-                Text(message.body)
-                    .font(EnigoFont.chatMessage)
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: EnigoRadius.input)
-                            .fill(isMine ? EnigoColor.goldAlpha(scheme, 0.14) : EnigoColor.fgAlpha(scheme, 0.06))
-                    )
+                VStack(alignment: .leading, spacing: 0) {
+                    if !message.body.isEmpty {
+                        Text(message.body)
+                            .font(EnigoFont.chatMessage)
+                            .padding(12)
+                    }
+                    if let gifUrl = message.gifUrl {
+                        AsyncImage(url: URL(string: gifUrl)) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .frame(height: 200)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: 200)
+                            case .failure:
+                                Image(systemName: "photo.fill")
+                                    .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.3))
+                                    .frame(height: 200)
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
+                        .padding(8)
+                    }
+                    if let photoUrl = message.photoUrl {
+                        AsyncImage(url: URL(string: photoUrl)) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .frame(height: 200)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(maxWidth: 200, maxHeight: 200)
+                                    .clipped()
+                                    .cornerRadius(EnigoRadius.input)
+                            case .failure:
+                                Image(systemName: "photo.fill")
+                                    .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.3))
+                                    .frame(height: 200)
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
+                        .padding(8)
+                    }
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: EnigoRadius.input)
+                        .fill(isMine ? EnigoColor.goldAlpha(scheme, 0.14) : EnigoColor.fgAlpha(scheme, 0.06))
+                )
                 if !isMine { Spacer(minLength: 40) }
             }
         }

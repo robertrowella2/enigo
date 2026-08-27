@@ -31,7 +31,7 @@ export async function recordMessage(
   matchId: string,
   senderId: string | null,
   body: string,
-  opts: { isSystem?: boolean; id?: string } = {},
+  opts: { isSystem?: boolean; id?: string; gifUrl?: string; photoUrl?: string } = {},
 ): Promise<{ charCount: number; isHeavy: boolean }> {
   const isSystem = opts.isSystem ?? false;
   const charCount = body.length;
@@ -51,6 +51,8 @@ export async function recordMessage(
     char_count: charCount,
     is_heavy: isHeavy,
     is_system: isSystem,
+    ...(opts.gifUrl ? { gif_url: opts.gifUrl } : {}),
+    ...(opts.photoUrl ? { photo_url: opts.photoUrl } : {}),
   });
   if (insertError) throw insertError;
 
