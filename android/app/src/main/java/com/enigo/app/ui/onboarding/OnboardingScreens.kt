@@ -238,6 +238,10 @@ fun InterestsScreen(appState: AppState) {
         ContentData.interests.filter { it.contains(searchText, ignoreCase = true) }
     }
 
+    val shouldShowCustomOption = searchText.isNotEmpty() &&
+        !filteredInterests.any { it.equals(searchText.trim(), ignoreCase = true) }
+    val customInterestText = "Add \"${searchText.trim()}\""
+
     EnigoScreen {
         Eyebrow("Step 2 of 3")
         ScreenTitle("What do you like?")
@@ -288,7 +292,7 @@ fun InterestsScreen(appState: AppState) {
 
         Text("${appState.selectedInterests.size} chosen", color = EnigoColor.accent(dark), fontFamily = EnigoFont.interFamily(400), fontSize = EnigoFont.metaSize)
 
-        if (filteredInterests.isNotEmpty()) {
+        if (filteredInterests.isNotEmpty() || shouldShowCustomOption) {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 90.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -301,6 +305,30 @@ fun InterestsScreen(appState: AppState) {
                             appState.selectedInterests - tag
                         } else {
                             appState.selectedInterests + tag
+                        }
+                    }
+                }
+                if (shouldShowCustomOption) {
+                    item {
+                        Button(
+                            onClick = {
+                                val trimmed = searchText.trim()
+                                appState.selectedInterests = appState.selectedInterests + trimmed
+                                searchText = ""
+                            },
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(EnigoRadius.control.dp))
+                                .border(1.5.dp, EnigoColor.accent(dark), RoundedCornerShape(EnigoRadius.control.dp))
+                                .background(Color.Transparent),
+                            contentPadding = PaddingValues(8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                        ) {
+                            Text(
+                                customInterestText,
+                                color = EnigoColor.accent(dark),
+                                fontFamily = EnigoFont.interFamily(600),
+                                fontSize = EnigoFont.chipLabelSize
+                            )
                         }
                     }
                 }

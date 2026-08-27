@@ -18,6 +18,15 @@ struct InterestsView: View {
         Array(ContentData.interests.prefix(10))
     }
 
+    var shouldShowCustomOption: Bool {
+        !searchText.isEmpty && !filteredInterests.contains(where: { $0.localizedCaseInsensitiveCompare(searchText) == .orderedSame })
+    }
+
+    var customInterestText: String {
+        let trimmed = searchText.trimmingCharacters(in: .whitespaces)
+        return "Add \"\(trimmed)\""
+    }
+
     var body: some View {
         EnigoScreen {
             Eyebrow(text: "Step 2 of 3")
@@ -55,9 +64,22 @@ struct InterestsView: View {
                         }
                     }
                 }
+                if shouldShowCustomOption {
+                    Button(action: {
+                        let trimmed = searchText.trimmingCharacters(in: .whitespaces)
+                        appState.selectedInterests.insert(trimmed)
+                        searchText = ""
+                    }) {
+                        Text(customInterestText)
+                            .font(EnigoFont.chipLabel)
+                            .foregroundStyle(EnigoColor.accent(scheme))
+                            .padding(8)
+                            .background(RoundedRectangle(cornerRadius: EnigoRadius.control).stroke(EnigoColor.accent(scheme), lineWidth: 1.5))
+                    }
+                }
             }
 
-            if filteredInterests.isEmpty {
+            if filteredInterests.isEmpty && !shouldShowCustomOption {
                 Text("No interests match your search")
                     .font(EnigoFont.meta)
                     .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
