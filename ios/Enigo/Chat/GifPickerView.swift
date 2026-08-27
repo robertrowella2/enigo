@@ -1,5 +1,12 @@
 import SwiftUI
 
+/// Your GIPHY API key. Get one free at https://developers.giphy.com —
+/// create an app, pick "API" (not SDK), and paste the key here. Like the
+/// Supabase anon key above it, this is a public client-side credential.
+/// While it's empty the picker says so rather than silently showing
+/// "No GIFs found".
+private let giphyAPIKey = ""
+
 struct GifPickerView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var scheme
@@ -7,6 +14,7 @@ struct GifPickerView: View {
     @State private var gifs: [GifResult] = []
     @State private var isLoading = false
     @State private var error: String?
+    @State private var searchTask: Task<Void, Never>?
     let onSelect: (String) -> Void
 
     var body: some View {
@@ -64,41 +72,65 @@ struct GifPickerView: View {
         .background(EnigoColor.background(scheme).ignoresSafeArea())
         .foregroundStyle(EnigoColor.body(scheme))
         .onChange(of: searchText) { _, newValue in
-            if newValue.isEmpty {
+            // One request per keystroke would burn through the rate limit,
+            // so each edit cancels the previous in-flight search and waits
+            // for a pause in typing.
+            searchTask?.cancel()
+            guard !newValue.isEmpty else {
                 gifs = []
                 error = nil
-            } else {
-                Task { await searchGifs(newValue) }
+                isLoading = false
+                return
+            }
+            searchTask = Task {
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                guard !Task.isCancelled else { return }
+                await searchGifs(newValue)
             }
         }
     }
 
     private func searchGifs(_ query: String) async {
+        guard !giphyAPIKey.isEmpty else {
+            error = "GIF search isn't set up yet — no GIPHY API key configured."
+            return
+        }
+
         isLoading = true
         error = nil
         defer { isLoading = false }
 
-        guard !query.isEmpty else { return }
-
-        let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "https://api.giphy.com/v1/gifs/search?q=\(encoded)&api_key=o6MpAH4I1qU0EcsL2MlARVBbFJG7bNVN&limit=20"
-
-        guard let url = URL(string: urlString) else {
+        var components = URLComponents(string: "https://api.giphy.com/v1/gifs/search")
+        components?.queryItems = [
+            URLQueryItem(name: "q", value: query),
+            URLQueryItem(name: "api_key", value: giphyAPIKey),
+            URLQueryItem(name: "limit", value: "20"),
+        ]
+        guard let url = components?.url else {
             error = "Invalid search URL"
             return
         }
 
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let decoder = JSONDecoder()
-            let response = try decoder.decode(GiphyResponse.self, from: data)
-            await MainActor.run {
-                self.gifs = response.data
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard !Task.isCancelled else { return }
+            // GIPHY returns its errors as a 200-shaped body with an empty
+            // `data` array, so decoding alone can't tell a bad key from a
+            // query with no matches — the status code is the only signal.
+            if let http = response as? HTTPURLResponse, http.statusCode != 200 {
+                error = http.statusCode == 401 || http.statusCode == 403
+                    ? "GIPHY rejected the API key."
+                    : "GIPHY returned an error (\(http.statusCode))."
+                gifs = []
+                return
             }
+            gifs = try JSONDecoder().decode(GiphyResponse.self, from: data).data
+        } catch is CancellationError {
+            return
         } catch {
-            await MainActor.run {
-                self.error = "Failed to load GIFs"
-            }
+            guard !Task.isCancelled else { return }
+            self.error = "Couldn't load GIFs. Check your connection and try again."
+            gifs = []
         }
     }
 }

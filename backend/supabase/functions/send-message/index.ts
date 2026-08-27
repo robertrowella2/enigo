@@ -158,13 +158,17 @@ async function generateAiReplyAndNotify(admin: any, matchId: string, aiUserId: s
   }
 }
 
+/** GIPHY serves media from numbered CDN subdomains (media0.giphy.com …
+ * media4.giphy.com, i.giphy.com), and which one a given GIF comes back on
+ * varies per request — so an exact-hostname allowlist rejects almost every
+ * real GIF. Match the registrable domain instead. The leading dot matters:
+ * without it "evilgiphy.com" would pass. */
 function isValidGifUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return false;
     const hostname = parsed.hostname.toLowerCase();
-    return hostname === "media.giphy.com" ||
-           hostname === "giphy.com" ||
-           hostname === "www.giphy.com";
+    return hostname === "giphy.com" || hostname.endsWith(".giphy.com");
   } catch {
     return false;
   }
