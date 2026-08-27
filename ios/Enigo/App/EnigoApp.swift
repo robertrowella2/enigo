@@ -65,6 +65,10 @@ struct RootView: View {
                 FeedbackView()
             case .changePhone:
                 ChangePhoneView()
+            case .recoveryEmail:
+                RecoveryEmailView()
+            case .emailSignIn:
+                EmailSignInView()
             case .softExit(let matchId):
                 SoftExitView(matchId: matchId)
             case .profile:

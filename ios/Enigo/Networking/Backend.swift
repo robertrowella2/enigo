@@ -90,6 +90,44 @@ final class Backend: ObservableObject {
         try await client.auth.session.user.phone
     }
 
+    // MARK: - Recovery email
+
+    /// A second way in, for the case `requestPhoneChange` can't help: the
+    /// number is already gone. Adding an email as a linked identity means the
+    /// account can be reached without the phone at all. Texts nothing — a
+    /// confirmation code goes to the address, redeemed by
+    /// `confirmRecoveryEmail`.
+    func setRecoveryEmail(_ email: String) async throws {
+        try await client.auth.update(user: UserAttributes(email: email))
+    }
+
+    /// `.emailChange` is the right type even when no email was set before:
+    /// GoTrue treats nil -> address as a change, and issues the code against
+    /// that flow rather than `.signup`.
+    func confirmRecoveryEmail(_ email: String, code: String) async throws {
+        try await client.auth.verifyOTP(email: email, token: code, type: .emailChange)
+    }
+
+    /// Only ever nil-or-confirmed: an address awaiting confirmation lives in
+    /// `new_email` server-side, so this reflects what can actually be signed
+    /// in with rather than what someone typed.
+    func currentEmail() async throws -> String? {
+        let email = try await client.auth.session.user.email
+        return (email?.isEmpty ?? true) ? nil : email
+    }
+
+    /// Signing in when the phone is gone. `shouldCreateUser: false` matters —
+    /// without it a typo'd address silently creates a brand new empty account
+    /// instead of reporting that no account uses that email.
+    func requestEmailSignIn(_ email: String) async throws {
+        try await client.auth.signInWithOTP(email: email, shouldCreateUser: false)
+    }
+
+    func verifyEmailSignIn(_ email: String, code: String) async throws {
+        try await client.auth.verifyOTP(email: email, token: code, type: .magiclink)
+        userId = try await client.auth.session.user.id
+    }
+
     // MARK: - Profile (onboarding)
 
     func fetchOwnProfile() async throws -> OwnProfile? {

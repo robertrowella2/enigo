@@ -42,6 +42,10 @@ struct PhoneView: View {
                 Task { await appState.submitPhone() }
             }
 
+            SecondaryLink(title: "Lost your number? Sign in with email") {
+                appState.step = .emailSignIn
+            }
+
             consentLine
         }
     }

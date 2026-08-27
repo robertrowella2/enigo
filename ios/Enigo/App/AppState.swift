@@ -33,6 +33,8 @@ enum Step: Equatable {
     case subscription
     case signInHelp
     case changePhone
+    case recoveryEmail
+    case emailSignIn
     case deleteAccountConfirm
 }
 
@@ -394,6 +396,82 @@ final class AppState: ObservableObject {
             self.phoneChangeCodeSent = false
             await self.loadCurrentPhone()
             self.step = .settings
+        }
+    }
+
+    // MARK: - Recovery email
+
+    @Published var recoveryEmail = ""
+    @Published var recoveryEmailCode = ""
+    @Published var recoveryEmailCodeSent = false
+    @Published var confirmedRecoveryEmail: String?
+
+    /// Deliberately loose. Anything stricter rejects addresses that are
+    /// perfectly valid (plus-addressing, new TLDs, unicode domains), and the
+    /// confirmation code is the real check — an address that can't receive
+    /// mail can't be confirmed, whatever it looks like.
+    var recoveryEmailLooksValid: Bool {
+        let trimmed = recoveryEmail.trimmingCharacters(in: .whitespaces)
+        guard let at = trimmed.firstIndex(of: "@"), at != trimmed.startIndex else { return false }
+        let domain = trimmed[trimmed.index(after: at)...]
+        return domain.contains(".") && !domain.hasSuffix(".") && !domain.contains(" ")
+    }
+
+    func loadRecoveryEmail() async {
+        confirmedRecoveryEmail = try? await backend.currentEmail()
+    }
+
+    func requestRecoveryEmail() async {
+        await run {
+            let email = self.recoveryEmail.trimmingCharacters(in: .whitespaces)
+            try await self.backend.setRecoveryEmail(email)
+            self.recoveryEmailCodeSent = true
+        }
+    }
+
+    func confirmRecoveryEmail() async {
+        await run {
+            let email = self.recoveryEmail.trimmingCharacters(in: .whitespaces)
+            try await self.backend.confirmRecoveryEmail(email, code: self.recoveryEmailCode)
+            self.recoveryEmail = ""
+            self.recoveryEmailCode = ""
+            self.recoveryEmailCodeSent = false
+            await self.loadRecoveryEmail()
+            self.step = .settings
+        }
+    }
+
+    // MARK: - Signing in by email (phone already lost)
+
+    @Published var emailSignInAddress = ""
+    @Published var emailSignInCode = ""
+    @Published var emailSignInCodeSent = false
+
+    func requestEmailSignIn() async {
+        await run {
+            try await self.backend.requestEmailSignIn(
+                self.emailSignInAddress.trimmingCharacters(in: .whitespaces)
+            )
+            self.emailSignInCodeSent = true
+        }
+    }
+
+    func verifyEmailSignIn() async {
+        await run {
+            try await self.backend.verifyEmailSignIn(
+                self.emailSignInAddress.trimmingCharacters(in: .whitespaces),
+                code: self.emailSignInCode
+            )
+            self.emailSignInAddress = ""
+            self.emailSignInCode = ""
+            self.emailSignInCodeSent = false
+            // Same branch as phone sign-in: an existing profile means this is
+            // a returning account, not a half-finished signup to resume.
+            if (try? await self.backend.fetchOwnProfile()) != nil {
+                self.openDashboard()
+            } else {
+                self.step = .name
+            }
         }
     }
 
