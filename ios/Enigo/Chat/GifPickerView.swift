@@ -142,32 +142,31 @@ private struct GifThumbnail: View {
 
     var body: some View {
         Button(action: onSelect) {
-            AsyncImage(url: URL(string: gif.images.fixedHeight.url)) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                        .aspectRatio(1, contentMode: .fit)
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity)
-                        .aspectRatio(1, contentMode: .fill)
-                        .clipped()
-                        .cornerRadius(EnigoRadius.input)
-                case .failure:
-                    Image(systemName: "photo.fill")
-                        .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.3))
-                        .frame(maxWidth: .infinity)
-                        .aspectRatio(1, contentMode: .fit)
-                        .background(EnigoColor.fgAlpha(scheme, 0.06))
-                        .cornerRadius(EnigoRadius.input)
-                @unknown default:
-                    EmptyView()
+            // A square cell is established first with a clear spacer, and the
+            // GIF is drawn inside it as an overlay. Sizing the image itself
+            // instead lets `.fill` push the frame past the grid column —
+            // which is why thumbnails spilled over their neighbours.
+            Color.clear
+                .aspectRatio(1, contentMode: .fit)
+                .overlay {
+                    AsyncImage(url: URL(string: gif.images.fixedHeight.url)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image.resizable().scaledToFill()
+                        case .failure:
+                            Image(systemName: "photo.fill")
+                                .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.3))
+                        case .empty:
+                            ProgressView()
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
                 }
-            }
+                .background(EnigoColor.fgAlpha(scheme, 0.06))
+                .clipShape(RoundedRectangle(cornerRadius: EnigoRadius.input))
         }
+        .buttonStyle(.plain)
     }
 }
 
