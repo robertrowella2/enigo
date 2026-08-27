@@ -22,6 +22,12 @@ targets:
     info:
       path: Enigo/Info.plist
       properties:
+        # Without these two, xcodegen bakes a literal CFBundleVersion of "1"
+        # into Info.plist and the CURRENT_PROJECT_VERSION/MARKETING_VERSION
+        # build settings below are silently ignored — every archive ships as
+        # build 1 and App Store Connect rejects it as a duplicate.
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
         UILaunchScreen:
           UIColorName: LaunchBackground
         UIAppFonts:
@@ -36,7 +42,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.enigo.app
         MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "3"
+        CURRENT_PROJECT_VERSION: "4"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"

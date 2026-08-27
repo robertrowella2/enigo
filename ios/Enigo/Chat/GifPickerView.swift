@@ -5,7 +5,7 @@ import SwiftUI
 /// Supabase anon key above it, this is a public client-side credential.
 /// While it's empty the picker says so rather than silently showing
 /// "No GIFs found".
-private let giphyAPIKey = ""
+private let giphyAPIKey = "B2Hwd1gOrbsBWjRAH1JzaTFT5o3RUSiV"
 
 struct GifPickerView: View {
     @Environment(\.dismiss) var dismiss
