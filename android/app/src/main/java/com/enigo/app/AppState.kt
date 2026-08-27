@@ -20,6 +20,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 sealed class Step {
+    object AgeVerification : Step()
     data class IntroSlide(val index: Int) : Step()
     object Phone : Step()
     object Verify : Step()
@@ -55,11 +56,12 @@ sealed class Step {
  * flow is linear and every step feeds the same draft profile.
  */
 class AppState : ViewModel() {
-    var step by mutableStateOf<Step>(Step.IntroSlide(0)); private set
+    var step by mutableStateOf<Step>(Step.AgeVerification); private set
     var errorMessage by mutableStateOf<String?>(null)
     var isBusy by mutableStateOf(false); private set
     var presentedLegalDocument by mutableStateOf<LegalDocument?>(null)
 
+    var birthdate by mutableStateOf<String?>(null)
     var phoneNumber by mutableStateOf("")
     var verifyCode by mutableStateOf("")
     var username by mutableStateOf(UsernameGenerator.generate())
@@ -200,6 +202,7 @@ class AppState : ViewModel() {
             username = username,
             firstName = firstName,
             lastName = lastName,
+            birthdate = birthdate,
             gender = gender,
             genderSelfDescription = genderSelfDescription.ifEmpty { null },
             matchWith = matchWith.toList(),

@@ -36,6 +36,139 @@ import com.enigo.app.data.ContentData
 import com.enigo.app.ui.account.LegalDocument
 import com.enigo.app.ui.theme.*
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+@Composable
+fun AgeVerificationScreen(appState: AppState) {
+    val dark = isSystemInDarkTheme()
+    var selectedYear by remember { mutableStateOf(2000) }
+    var selectedMonth by remember { mutableStateOf(1) }
+    var selectedDay by remember { mutableStateOf(1) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    EnigoScreen {
+        Eyebrow("Step 1 of 3")
+        ScreenTitle("What's your birthdate?")
+        Text(
+            "Enigo is for people 18 and older. We'll keep this private.",
+            color = EnigoColor.fgAlpha(dark, 0.62f),
+            fontFamily = EnigoFont.interFamily(400),
+            fontSize = EnigoFont.bodySize
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Month picker
+            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Month", fontSize = 12.sp, color = EnigoColor.fgAlpha(dark, 0.5f))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { selectedMonth = if (selectedMonth > 1) selectedMonth - 1 else 12 },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = EnigoColor.fgAlpha(dark, 0.06f))
+                    ) { Text("−", color = EnigoColor.body(dark)) }
+                    Text(
+                        selectedMonth.toString().padStart(2, '0'),
+                        modifier = Modifier
+                            .weight(1f)
+                            .align(Alignment.CenterVertically),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    Button(
+                        onClick = { selectedMonth = if (selectedMonth < 12) selectedMonth + 1 else 1 },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = EnigoColor.fgAlpha(dark, 0.06f))
+                    ) { Text("+", color = EnigoColor.body(dark)) }
+                }
+            }
+
+            // Day picker
+            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Day", fontSize = 12.sp, color = EnigoColor.fgAlpha(dark, 0.5f))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { selectedDay = if (selectedDay > 1) selectedDay - 1 else 31 },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = EnigoColor.fgAlpha(dark, 0.06f))
+                    ) { Text("−", color = EnigoColor.body(dark)) }
+                    Text(
+                        selectedDay.toString().padStart(2, '0'),
+                        modifier = Modifier
+                            .weight(1f)
+                            .align(Alignment.CenterVertically),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    Button(
+                        onClick = { selectedDay = if (selectedDay < 31) selectedDay + 1 else 1 },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = EnigoColor.fgAlpha(dark, 0.06f))
+                    ) { Text("+", color = EnigoColor.body(dark)) }
+                }
+            }
+
+            // Year picker
+            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Year", fontSize = 12.sp, color = EnigoColor.fgAlpha(dark, 0.5f))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { selectedYear = selectedYear - 1 },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = EnigoColor.fgAlpha(dark, 0.06f))
+                    ) { Text("−", color = EnigoColor.body(dark)) }
+                    Text(
+                        selectedYear.toString(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .align(Alignment.CenterVertically),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    Button(
+                        onClick = { selectedYear = selectedYear + 1 },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = EnigoColor.fgAlpha(dark, 0.06f))
+                    ) { Text("+", color = EnigoColor.body(dark)) }
+                }
+            }
+        }
+
+        if (errorMessage != null) {
+            Text(
+                errorMessage ?: "",
+                color = EnigoColor.danger(dark),
+                fontFamily = EnigoFont.interFamily(400),
+                fontSize = EnigoFont.metaSize
+            )
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        PrimaryButton(
+            title = "Continue",
+            disabled = false
+        ) {
+            try {
+                val dateStr = "$selectedYear-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}"
+                val birthDate = LocalDate.parse(dateStr)
+                val today = LocalDate.now()
+                val age = today.year - birthDate.year - (if (today.month < birthDate.month || (today.month == birthDate.month && today.dayOfMonth < birthDate.dayOfMonth)) 1 else 0)
+
+                if (age >= 18) {
+                    appState.birthdate = dateStr
+                    appState.step = AppState.Step.IntroSlide(0)
+                } else {
+                    errorMessage = "You must be at least 18 years old."
+                }
+            } catch (e: Exception) {
+                errorMessage = "Invalid date. Please check your entry."
+            }
+        }
+    }
+}
 
 @Composable
 fun IntroScreen(appState: AppState, slideIndex: Int) {

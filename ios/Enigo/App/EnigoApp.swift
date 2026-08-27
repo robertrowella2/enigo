@@ -19,6 +19,8 @@ struct RootView: View {
     var body: some View {
         Group {
             switch appState.step {
+            case .ageVerification:
+                AgeVerificationView()
             case .introSlide(let i):
                 IntroView(slideIndex: i)
             case .phone:

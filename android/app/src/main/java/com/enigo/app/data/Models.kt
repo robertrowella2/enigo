@@ -14,6 +14,7 @@ data class OnboardingProfile(
     val username: String,
     val firstName: String,
     val lastName: String,
+    val birthdate: String? = null,
     val gender: String? = null,
     val genderSelfDescription: String? = null,
     val matchWith: List<String>,

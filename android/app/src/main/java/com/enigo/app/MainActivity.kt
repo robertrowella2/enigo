@@ -49,6 +49,7 @@ fun RootView(appState: AppState) {
     LaunchedEffect(Unit) { appState.bootstrap() }
 
     when (val step = appState.step) {
+        Step.AgeVerification -> AgeVerificationScreen(appState)
         is Step.IntroSlide -> IntroScreen(appState, step.index)
         Step.Phone -> PhoneScreen(appState)
         Step.Verify -> VerifyScreen(appState)

@@ -9,6 +9,7 @@ struct OnboardingProfile: Encodable {
     var username: String
     var firstName: String
     var lastName: String
+    var birthdate: Date?
     var gender: String?
     var genderSelfDescription: String?
     var matchWith: [String]

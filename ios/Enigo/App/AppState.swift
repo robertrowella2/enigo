@@ -4,6 +4,7 @@ import Supabase
 import SwiftUI
 
 enum Step: Equatable {
+    case ageVerification
     case introSlide(Int)
     case phone
     case verify
@@ -39,13 +40,14 @@ enum Step: Equatable {
 /// same draft profile.
 @MainActor
 final class AppState: ObservableObject {
-    @Published var step: Step = .introSlide(0)
+    @Published var step: Step = .ageVerification
     @Published var errorMessage: String?
     @Published var isBusy = false
     @Published var presentedLegalDocument: LegalDocument?
 
     // Onboarding draft — persisted to the backend in one upsert once
     // notification permission is resolved (see `completeOnboarding`).
+    @Published var birthdate = Date()
     @Published var phoneNumber = ""
     @Published var verifyCode = ""
     @Published var username = UsernameGenerator.generate()
@@ -218,6 +220,7 @@ final class AppState: ObservableObject {
                 username: self.username,
                 firstName: self.firstName,
                 lastName: self.lastName,
+                birthdate: self.birthdate,
                 gender: self.gender,
                 genderSelfDescription: self.genderSelfDescription.isEmpty ? nil : self.genderSelfDescription,
                 matchWith: Array(self.matchWith),
