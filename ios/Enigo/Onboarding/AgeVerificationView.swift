@@ -14,12 +14,18 @@ struct AgeVerificationView: View {
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 
+            // The wheel style gives the label no room, so SwiftUI wraps
+            // "Birthdate" one character at a time down the left edge. The
+            // screen title already says what this is.
             DatePicker(
                 "Birthdate",
                 selection: $selectedDate,
+                in: ...Date(),
                 displayedComponents: .date
             )
             .datePickerStyle(.wheel)
+            .labelsHidden()
+            .frame(maxWidth: .infinity)
             .frame(maxHeight: 200)
 
             if let error = errorMessage {
