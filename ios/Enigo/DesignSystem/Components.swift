@@ -42,10 +42,15 @@ struct PrimaryButton: View {
             }
             .padding(.vertical, 16)
             .background(
-                RoundedRectangle(cornerRadius: EnigoRadius.control)
+                RoundedRectangle(cornerRadius: 16)
                     .fill(disabled ? EnigoColor.fgAlpha(scheme, 0.12) : EnigoColor.primaryFill(scheme))
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.white.opacity(0.2), lineWidth: 1)
+            )
             .foregroundStyle(disabled ? EnigoColor.fgAlpha(scheme, 0.4) : EnigoColor.primaryLabel(scheme))
+            .shadow(color: EnigoColor.primaryFill(scheme).opacity(0.2), radius: 8, x: 0, y: 4)
         }
         .disabled(disabled || isLoading)
     }
@@ -102,13 +107,14 @@ struct SelectableRow: View {
                 .padding(.vertical, 16)
                 .padding(.horizontal, 18)
                 .background(
-                    RoundedRectangle(cornerRadius: EnigoRadius.control)
-                        .fill(selected ? EnigoColor.goldAlpha(scheme, 0.12) : EnigoColor.fgAlpha(scheme, 0.05))
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(selected ? EnigoColor.goldAlpha(scheme, 0.15) : .white.opacity(0.4))
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: EnigoRadius.control)
-                        .stroke(selected ? EnigoColor.accent(scheme).opacity(0.55) : EnigoColor.fgAlpha(scheme, 0.1), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(selected ? EnigoColor.accent(scheme).opacity(0.6) : .white.opacity(0.3), lineWidth: 1.5)
                 )
+                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
                 .foregroundStyle(selected ? EnigoColor.accent(scheme) : EnigoColor.body(scheme))
         }
     }
@@ -128,11 +134,12 @@ struct SelectableChip: View {
                 .padding(.vertical, 10)
                 .padding(.horizontal, 14)
                 .background(
-                    Capsule().fill(selected ? EnigoColor.goldAlpha(scheme, 0.12) : EnigoColor.fgAlpha(scheme, 0.05))
+                    Capsule().fill(selected ? EnigoColor.goldAlpha(scheme, 0.15) : .white.opacity(0.4))
                 )
                 .overlay(
-                    Capsule().stroke(selected ? EnigoColor.accent(scheme).opacity(0.55) : EnigoColor.fgAlpha(scheme, 0.1), lineWidth: 1)
+                    Capsule().stroke(selected ? EnigoColor.accent(scheme).opacity(0.6) : .white.opacity(0.3), lineWidth: 1.5)
                 )
+                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
                 .foregroundStyle(selected ? EnigoColor.accent(scheme) : EnigoColor.body(scheme))
         }
     }

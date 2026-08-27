@@ -131,12 +131,14 @@ struct ChatView: View {
                 .id(vm.sendGeneration)
                 .font(EnigoFont.chatMessage)
                 .padding(12)
-                .background(RoundedRectangle(cornerRadius: EnigoRadius.input).fill(EnigoColor.fgAlpha(scheme, 0.06)))
+                .background(RoundedRectangle(cornerRadius: 16).fill(.white.opacity(0.4)))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(.white.opacity(0.3), lineWidth: 1))
             Button(action: { showGifPicker = true }) {
                 Image(systemName: "smiley")
                     .font(.system(size: 16, weight: .semibold))
                     .frame(width: 46, height: 46)
-                    .background(Circle().fill(EnigoColor.fgAlpha(scheme, 0.1)))
+                    .background(Circle().fill(.white.opacity(0.3)))
+                    .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
                     .foregroundStyle(EnigoColor.body(scheme))
             }
             Button(action: vm.send) {
@@ -144,6 +146,8 @@ struct ChatView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .frame(width: 46, height: 46)
                     .background(Circle().fill(EnigoColor.primaryFill(scheme)))
+                    .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 1))
+                    .shadow(color: EnigoColor.primaryFill(scheme).opacity(0.3), radius: 6, x: 0, y: 2)
                     .foregroundStyle(EnigoColor.primaryLabel(scheme))
             }
             .disabled(vm.draft.trimmingCharacters(in: .whitespaces).isEmpty || vm.isSending)
@@ -218,9 +222,14 @@ private struct MessageBubble: View {
                     }
                 }
                 .background(
-                    RoundedRectangle(cornerRadius: EnigoRadius.input)
-                        .fill(isMine ? EnigoColor.goldAlpha(scheme, 0.14) : EnigoColor.fgAlpha(scheme, 0.06))
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(isMine ? EnigoColor.goldAlpha(scheme, 0.16) : .white.opacity(0.5))
                 )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(.white.opacity(0.3), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
                 if !isMine { Spacer(minLength: 40) }
             }
         }
