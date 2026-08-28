@@ -17,6 +17,18 @@ brew install xcodegen
 
 cd "$CI_PRIMARY_REPOSITORY_PATH/ios"
 
+# Xcode Cloud's own auto-increment stamps CFBundleVersion with the CI run
+# number, which restarts at 1 and so landed *below* builds already uploaded
+# from this machine (16 at the time of writing) — App Store Connect will not
+# accept a build that numbers lower than one already used for the version.
+# Deriving it here from CI_BUILD_NUMBER with an offset keeps it both
+# monotonic and clear of everything uploaded manually. Turn OFF the
+# workflow's own auto-increment, or it overrides this.
+BUILD_NUMBER=$(( 100 + ${CI_BUILD_NUMBER:-0} ))
+echo "Setting CURRENT_PROJECT_VERSION to $BUILD_NUMBER (CI run ${CI_BUILD_NUMBER:-?})"
+sed -i '' "s/CURRENT_PROJECT_VERSION: \".*\"/CURRENT_PROJECT_VERSION: \"$BUILD_NUMBER\"/" project.yml
+grep CURRENT_PROJECT_VERSION project.yml
+
 echo "Generating Enigo.xcodeproj from project.yml…"
 xcodegen generate
 
