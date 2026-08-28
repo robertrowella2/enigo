@@ -28,6 +28,11 @@ targets:
         # build 1 and App Store Connect rejects it as a duplicate.
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        # Enigo only uses HTTPS to talk to Supabase, Twilio and GIPHY — that
+        # is exempt encryption, and declaring it here stops App Store Connect
+        # asking on every single upload and holding the build in processing
+        # until someone answers.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen:
           UIColorName: LaunchBackground
         UIAppFonts:
@@ -42,7 +47,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.enigo.app
         MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "12"
+        CURRENT_PROJECT_VERSION: "13"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"
