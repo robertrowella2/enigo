@@ -56,7 +56,7 @@ struct PrimaryButton: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(.white.opacity(0.2), lineWidth: 1)
+                    .stroke(EnigoColor.glassStroke(scheme), lineWidth: 1)
             )
             .foregroundStyle(disabled ? EnigoColor.fgAlpha(scheme, 0.4) : EnigoColor.primaryLabel(scheme))
             .shadow(color: EnigoColor.primaryFill(scheme).opacity(0.2), radius: 8, x: 0, y: 4)
@@ -117,13 +117,13 @@ struct SelectableRow: View {
                 .padding(.horizontal, 18)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(selected ? EnigoColor.goldAlpha(scheme, 0.15) : .white.opacity(0.4))
+                        .fill(selected ? EnigoColor.goldAlpha(scheme, 0.15) : EnigoColor.glassFill(scheme))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(selected ? EnigoColor.accent(scheme).opacity(0.6) : .white.opacity(0.3), lineWidth: 1.5)
+                        .stroke(selected ? EnigoColor.accent(scheme).opacity(0.6) : EnigoColor.glassStroke(scheme), lineWidth: 1.5)
                 )
-                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                .shadow(color: EnigoColor.glassShadow(scheme), radius: 4, x: 0, y: 2)
                 .foregroundStyle(selected ? EnigoColor.accent(scheme) : EnigoColor.body(scheme))
         }
     }
@@ -143,12 +143,12 @@ struct SelectableChip: View {
                 .padding(.vertical, 10)
                 .padding(.horizontal, 14)
                 .background(
-                    Capsule().fill(selected ? EnigoColor.goldAlpha(scheme, 0.15) : .white.opacity(0.4))
+                    Capsule().fill(selected ? EnigoColor.goldAlpha(scheme, 0.15) : EnigoColor.glassFill(scheme))
                 )
                 .overlay(
-                    Capsule().stroke(selected ? EnigoColor.accent(scheme).opacity(0.6) : .white.opacity(0.3), lineWidth: 1.5)
+                    Capsule().stroke(selected ? EnigoColor.accent(scheme).opacity(0.6) : EnigoColor.glassStroke(scheme), lineWidth: 1.5)
                 )
-                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                .shadow(color: EnigoColor.glassShadow(scheme), radius: 4, x: 0, y: 2)
                 .foregroundStyle(selected ? EnigoColor.accent(scheme) : EnigoColor.body(scheme))
         }
     }

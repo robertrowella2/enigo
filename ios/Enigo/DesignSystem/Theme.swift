@@ -34,6 +34,31 @@ enum EnigoColor {
     static func fgAlpha(_ scheme: ColorScheme, _ alpha: Double) -> Color {
         body(scheme).opacity(alpha)
     }
+
+    // MARK: - Frosted surfaces
+    //
+    // A white wash reads as a soft highlight over ivory and as a glare over
+    // navy — the same opacity that lifts a control in light mode blows it out
+    // in dark. So dark mode lifts with a fraction of the white, and warms it
+    // toward the gold rather than staying neutral, which keeps the frosting
+    // in the same family as the rest of the palette instead of introducing a
+    // cold grey nothing else uses.
+
+    /// Fill behind buttons, chips, rows and message bubbles.
+    static func glassFill(_ scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: 0xE8D9A8).opacity(0.07) : Color.white.opacity(0.45)
+    }
+
+    /// The hairline that gives a frosted surface its edge.
+    static func glassStroke(_ scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: 0xE8D9A8).opacity(0.14) : Color.white.opacity(0.38)
+    }
+
+    /// Drop shadows do almost nothing on a navy ground — they read as smudge
+    /// rather than depth — so dark mode leans on the stroke instead.
+    static func glassShadow(_ scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color.black.opacity(0.22) : Color.black.opacity(0.06)
+    }
     static func goldAlpha(_ scheme: ColorScheme, _ alpha: Double) -> Color {
         accent(scheme).opacity(alpha)
     }
