@@ -7,7 +7,14 @@ struct PhotoView: View {
     @State private var pickerItem: PhotosPickerItem?
 
     var body: some View {
-        EnigoScreen {
+        // Read the photo once here rather than inside the overlay closure:
+        // AppState is @MainActor and that closure isn't guaranteed to inherit
+        // the isolation, which warns under Swift 5 and fails to compile under
+        // Swift 6. Decoding once per body pass instead of once per overlay
+        // evaluation is the cheaper path anyway.
+        let chosenPhoto = appState.photoData.flatMap { UIImage(data: $0) }
+
+        return EnigoScreen {
             Eyebrow(text: "Photo · step 1 of 3")
             ScreenTitle(text: "Add a photo nobody sees yet")
             Text("It stays completely private until graduation — the very last thing that unlocks.")
@@ -19,8 +26,8 @@ struct PhotoView: View {
                     .strokeBorder(EnigoColor.fgAlpha(scheme, 0.2), style: StrokeStyle(lineWidth: 1.5, dash: [6, 6]))
                     .frame(height: 196)
                     .overlay {
-                        if let data = appState.photoData, let uiImage = UIImage(data: data) {
-                            Image(uiImage: uiImage)
+                        if let chosenPhoto {
+                            Image(uiImage: chosenPhoto)
                                 .resizable()
                                 .scaledToFill()
                                 .clipShape(RoundedRectangle(cornerRadius: EnigoRadius.photoWell))
