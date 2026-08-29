@@ -68,10 +68,24 @@ struct PaywallView: View {
         do {
             products = try await Product.products(for: [StoreProductID.proMonthly, StoreProductID.boost])
             if products.isEmpty {
-                loadError = "No products found — configure them in App Store Connect (or select Products.storekit as this scheme's StoreKit Configuration for local testing)."
+                // Users saw build instructions here — "configure them in App
+                // Store Connect", naming a local .storekit file. StoreKit
+                // returns nothing for perfectly ordinary reasons too: an App
+                // Store outage, no network, or purchases restricted on the
+                // device. The diagnostic is worth keeping for development,
+                // but only where a developer will see it.
+                #if DEBUG
+                loadError = "No products returned by StoreKit — configure them in App Store Connect, or select Products.storekit as this scheme's StoreKit Configuration for local testing."
+                #else
+                loadError = "Pro isn't available right now. Check your connection and try again in a moment."
+                #endif
             }
         } catch {
+            #if DEBUG
             loadError = error.localizedDescription
+            #else
+            loadError = "Pro isn't available right now. Check your connection and try again in a moment."
+            #endif
         }
     }
 
