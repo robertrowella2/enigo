@@ -1,8 +1,8 @@
 import StoreKit
 import SwiftUI
 
-/// Pro $8/month: three conversations at once, unlimited fresh starts,
-/// shared-interest matching. Secondary: a one-time $2 boost for one extra
+/// Pro: three conversations at once, unlimited fresh starts,
+/// shared-interest matching. Secondary: a one-time boost for one extra
 /// rematch after the free tier's 3 declines. Real StoreKit 2 purchase flow —
 /// see Products.storekit for local testing and README-ios-iap.md (below)
 /// for what you need to configure in App Store Connect before this can
@@ -18,6 +18,24 @@ struct PaywallView: View {
     @State private var products: [Product] = []
     @State private var loadError: String?
 
+    /// The price comes from StoreKit, so the figure on screen is the one the
+    /// user will actually be charged, in their own currency. It used to read
+    /// a hardcoded "$8/month" while App Store Connect charged $5.99 in the US
+    /// — and different amounts again in every other territory, so an
+    /// Australian saw "$8" and would have been billed A$9.99. Stating a price
+    /// that does not match what is charged is a Guideline 3.1.2 rejection.
+    ///
+    /// When StoreKit has not returned the product there is no price to state,
+    /// so none is claimed — the subscription cannot be bought in that state
+    /// anyway, and a stale number is worse than no number.
+    private var proDescription: String {
+        let features = "three conversations at once, unlimited fresh starts, and shared-interest matching."
+        guard let price = products.first(where: { $0.id == StoreProductID.proMonthly })?.displayPrice else {
+            return features.prefix(1).uppercased() + features.dropFirst()
+        }
+        return "\(price)/month — \(features)"
+    }
+
     var body: some View {
         EnigoScreen {
             HStack {
@@ -28,7 +46,7 @@ struct PaywallView: View {
             }
 
             ScreenTitle(text: "Enigo Pro")
-            Text("$8/month — three conversations at once, unlimited fresh starts, and shared-interest matching.")
+            Text(proDescription)
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 
