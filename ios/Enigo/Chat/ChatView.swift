@@ -10,6 +10,12 @@ struct ChatView: View {
     /// every background poll, and a TextField bound to it dropped characters
     /// while someone was mid-sentence.
     @State private var draft = ""
+    /// A vertical TextField can keep painting the old string after the bound
+    /// value is cleared, so the field is rebuilt on each send. This lives in
+    /// the view and changes only on send — the previous version kept it on
+    /// the view model, where it rode along with every background poll and
+    /// tore the field down mid-sentence.
+    @State private var sendGeneration = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -100,6 +106,7 @@ struct ChatView: View {
         .onChange(of: vm.draftToRestore) { _, restored in
             if let restored {
                 draft = restored
+                sendGeneration += 1
                 vm.draftToRestore = nil
             }
         }
@@ -166,6 +173,7 @@ struct ChatView: View {
     private var composer: some View {
         HStack(spacing: 10) {
             TextField("Type something real...", text: $draft, axis: .vertical)
+                .id(sendGeneration)
                 .font(EnigoFont.chatMessage)
                 .padding(12)
                 .background(RoundedRectangle(cornerRadius: 16).fill(EnigoColor.glassFill(scheme)))
@@ -181,6 +189,7 @@ struct ChatView: View {
             Button(action: {
                 let text = draft
                 draft = ""
+                sendGeneration += 1
                 vm.send(text)
             }) {
                 Image(systemName: "arrow.up")
