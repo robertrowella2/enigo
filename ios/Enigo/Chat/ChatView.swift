@@ -14,6 +14,25 @@ struct ChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
+                        // Stated up front, in the user's own words from the
+                        // first screen of the conversation — the header badge
+                        // alone is easy to read past.
+                        if vm.matchState?.isAiMatch == true {
+                            Text("While you wait for a real match, this is an AI persona chosen to be close to what you're looking for. It is not a person. When someone real is available, they take this slot.")
+                                .font(EnigoFont.meta)
+                                .foregroundStyle(EnigoColor.body(scheme))
+                                .padding(14)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(EnigoColor.goldAlpha(scheme, 0.14))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(EnigoColor.accent(scheme).opacity(0.45), lineWidth: 1)
+                                )
+                                .padding(.top, 8)
+                        }
                         if vm.messages.isEmpty {
                             Text("You know each other's usernames. Everything else arrives in its own time.")
                                 .font(EnigoFont.meta)
@@ -110,9 +129,18 @@ struct ChatView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("@\(vm.matchState?.partnerUsername ?? "…")")
                     .font(EnigoFont.fraunces(size: 19, weight: 600))
-                Text("\(vm.messages.filter { !$0.isSystem }.count) messages")
-                    .font(EnigoFont.meta)
-                    .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                // Sits where the message count normally goes, so it is on
+                // screen for the whole conversation rather than something you
+                // could scroll past and forget.
+                if vm.matchState?.isAiMatch == true {
+                    Text("AI persona · not a real person")
+                        .font(EnigoFont.meta)
+                        .foregroundStyle(EnigoColor.accent(scheme))
+                } else {
+                    Text("\(vm.messages.filter { !$0.isSystem }.count) messages")
+                        .font(EnigoFont.meta)
+                        .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                }
             }
             Spacer()
             Button("Known") { vm.showKnownSheet = true }

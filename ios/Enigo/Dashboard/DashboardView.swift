@@ -111,6 +111,17 @@ private struct ConnectionRow: View {
                     Text("@\(state.partnerUsername)")
                         .font(EnigoFont.fraunces(size: 18, weight: 600))
                         .foregroundStyle(EnigoColor.dominant(scheme))
+                    // Next to the username, so the distinction is visible in
+                    // the connections list without opening the chat.
+                    if state.isAiMatch {
+                        Text("AI")
+                            .font(EnigoFont.meta)
+                            .padding(.vertical, 3)
+                            .padding(.horizontal, 7)
+                            .background(Capsule().fill(EnigoColor.goldAlpha(scheme, 0.18)))
+                            .overlay(Capsule().stroke(EnigoColor.accent(scheme).opacity(0.5), lineWidth: 1))
+                            .foregroundStyle(EnigoColor.accent(scheme))
+                    }
                     Spacer()
                     if let km = state.distanceKm {
                         Text("~\(km) km")

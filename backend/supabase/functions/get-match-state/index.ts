@@ -16,7 +16,7 @@ export default {
 
     const { data: match, error: matchError } = await admin
       .from("matches")
-      .select("id, user_a, user_b, status")
+      .select("id, user_a, user_b, status, is_ai_match")
       .eq("id", matchId)
       .single();
     if (matchError) {
@@ -56,6 +56,11 @@ export default {
       matchId: match.id,
       status: match.status,
       partnerUsername: partner.username,
+      // Sent on every match-state fetch, never omitted: the app labels an AI
+      // persona wherever the conversation is shown, so someone always knows
+      // who they are talking to. Previously is_ai_match lived only in the
+      // database and the client had no way to tell a persona from a person.
+      isAiMatch: match.is_ai_match === true,
       unlocked: Array.from(unlocked),
       partnerReadAt: partnerCounter?.last_read_at ?? null,
     };
