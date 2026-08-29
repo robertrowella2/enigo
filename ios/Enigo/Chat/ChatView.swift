@@ -6,6 +6,10 @@ struct ChatView: View {
     @Environment(\.colorScheme) private var scheme
     @StateObject private var vm = ChatViewModel()
     @State private var showGifPicker = false
+    /// Owned by the view, not the view model: ChatViewModel republishes on
+    /// every background poll, and a TextField bound to it dropped characters
+    /// while someone was mid-sentence.
+    @State private var draft = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -93,6 +97,12 @@ struct ChatView: View {
         }, message: {
             Text(vm.errorMessage ?? "")
         })
+        .onChange(of: vm.draftToRestore) { _, restored in
+            if let restored {
+                draft = restored
+                vm.draftToRestore = nil
+            }
+        }
         .sheet(isPresented: $showGifPicker) {
             GifPickerView { url in
                 vm.sendGif(url: url)
@@ -155,8 +165,7 @@ struct ChatView: View {
 
     private var composer: some View {
         HStack(spacing: 10) {
-            TextField("Type something real...", text: $vm.draft, axis: .vertical)
-                .id(vm.sendGeneration)
+            TextField("Type something real...", text: $draft, axis: .vertical)
                 .font(EnigoFont.chatMessage)
                 .padding(12)
                 .background(RoundedRectangle(cornerRadius: 16).fill(EnigoColor.glassFill(scheme)))
@@ -169,7 +178,11 @@ struct ChatView: View {
                     .overlay(Circle().stroke(EnigoColor.glassStroke(scheme), lineWidth: 1))
                     .foregroundStyle(EnigoColor.body(scheme))
             }
-            Button(action: vm.send) {
+            Button(action: {
+                let text = draft
+                draft = ""
+                vm.send(text)
+            }) {
                 Image(systemName: "arrow.up")
                     .font(.system(size: 16, weight: .semibold))
                     .frame(width: 46, height: 46)
@@ -178,7 +191,7 @@ struct ChatView: View {
                     .shadow(color: EnigoColor.primaryFill(scheme).opacity(0.3), radius: 6, x: 0, y: 2)
                     .foregroundStyle(EnigoColor.primaryLabel(scheme))
             }
-            .disabled(vm.draft.trimmingCharacters(in: .whitespaces).isEmpty || vm.isSending)
+            .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty || vm.isSending)
         }
         .padding(EnigoSpacing.listHorizontal)
     }

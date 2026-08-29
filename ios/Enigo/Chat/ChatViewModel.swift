@@ -4,14 +4,13 @@ import Foundation
 final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
     @Published var matchState: MatchStateResponse?
-    @Published var draft: String = ""
-    /// Bumped every time `draft` is cleared programmatically after a send.
-    /// A multi-line TextField(axis: .vertical) bound to `draft` can visibly
-    /// keep showing the old text even though the underlying value is
-    /// correctly empty (a known SwiftUI sync quirk) — ChatView gives the
-    /// TextField `.id(sendGeneration)` so it's rebuilt fresh instead of
-    /// relying on the stale in-place render.
-    @Published var sendGeneration = 0
+    /// Set only when a send fails, so the view can put the text back in the
+    /// composer rather than making someone retype it. The draft itself lives
+    /// in ChatView's own @State: this object republishes on every poll, and a
+    /// TextField bound to it lost characters mid-typing as those updates
+    /// landed. An earlier attempt bounced the field's `.id` to force a
+    /// redraw, which destroyed in-progress text instead of fixing it.
+    @Published var draftToRestore: String?
     @Published var isSending = false
     @Published var celebrationField: UnlockField?
     @Published var showKnownSheet = false
@@ -75,11 +74,8 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
-    func send() {
-        guard let matchId, !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        let text = draft
-        draft = ""
-        sendGeneration += 1
+    func send(_ text: String) {
+        guard let matchId, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         isSending = true
 
         // Show it immediately rather than waiting on the round trip — for an
@@ -107,8 +103,7 @@ final class ChatViewModel: ObservableObject {
                 // e.g. a blocked message (phone number, photo link) shouldn't
                 // look like it sent, and shouldn't force the user to retype it.
                 messages.removeAll { $0.id == optimistic.id }
-                draft = text
-                sendGeneration += 1
+                draftToRestore = text
                 errorMessage = Backend.friendlyMessage(from: error)
             }
             isSending = false
