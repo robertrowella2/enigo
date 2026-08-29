@@ -9,6 +9,9 @@ struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var scheme
     private let radii = [25, 50, 100]
+    private let genderOptions = [
+        ("men", "Men"), ("women", "Women"), ("nonbinary", "Nonbinary"), ("anyone", "Anyone"),
+    ]
     private let communityOptions = [
         ("in_community", "Match me inside the community"),
         ("open", "It matters but I'm open either way"),
@@ -29,6 +32,27 @@ struct SettingsView: View {
 
             if let profile = appState.ownProfile {
                 section("MATCHING") {
+                    // These were set once during onboarding and then had no
+                    // way to change. Someone who picked narrowly, or changed
+                    // their mind, got no matches for as long as nobody fit —
+                    // and the searching screen is where they were left.
+                    Text("Match me with").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                    HStack(spacing: 8) {
+                        ForEach(genderOptions, id: \.0) { value, label in
+                            SelectableChip(text: label, selected: profile.matchWith.contains(value)) {
+                                Task { await appState.patchProfile(ProfilePatch(matchWith: toggled(profile.matchWith, value))) }
+                            }
+                        }
+                    }
+                    Text("Show me to").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                    HStack(spacing: 8) {
+                        ForEach(genderOptions, id: \.0) { value, label in
+                            SelectableChip(text: label, selected: profile.shownTo.contains(value)) {
+                                Task { await appState.patchProfile(ProfilePatch(shownTo: toggled(profile.shownTo, value))) }
+                            }
+                        }
+                    }
+
                     ForEach(communityOptions, id: \.0) { value, label in
                         SelectableRow(text: label, selected: profile.community == value) {
                             Task { await appState.patchProfile(ProfilePatch(community: value)) }
@@ -104,6 +128,14 @@ struct SettingsView: View {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
             notificationsEnabled = settings.authorizationStatus == .authorized
         }
+    }
+
+    /// Never lets the list empty out — a profile matching nobody is how
+    /// someone ends up stuck on the searching screen indefinitely.
+    private func toggled(_ current: [String], _ value: String) -> [String] {
+        var next = Set(current)
+        if next.contains(value) { next.remove(value) } else { next.insert(value) }
+        return next.isEmpty ? [value] : Array(next)
     }
 
     @ViewBuilder
