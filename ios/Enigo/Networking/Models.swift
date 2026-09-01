@@ -55,8 +55,8 @@ struct MatchStateResponse: Decodable {
     var status: String
     var partnerUsername: String
     /// True when this "match" is an AI persona rather than a person. Shown
-    /// wherever the conversation appears — a dating app must never leave
-    /// someone guessing whether they are talking to a human.
+    /// wherever the conversation appears — nobody should ever be left
+    /// guessing whether they are writing to a human.
     var isAiMatch: Bool = false
     var partnerFirstName: String?
     var unlocked: [String]
