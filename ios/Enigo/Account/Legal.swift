@@ -47,12 +47,13 @@ enum LegalContent {
             "Automatic upgrades — if you're placed with a pen pal and a better or more compatible real person becomes available, Enigo may end that match and connect you with the new one automatically.\n\n" +
             "AI conversational partner — when no compatible real person is available yet, Enigo may temporarily connect you with an AI-generated conversational partner rather than leave you with nothing to do. This partner is not a real person — it is software designed to hold a conversation in a similar style to how a real match would. Enigo automatically ends this AI-assisted match and replaces it with a real person as soon as one becomes available, at no cost to you and without losing your progress toward that match's unlocks. You can turn off AI-assisted matching in Settings."),
         LegalSection(heading: "Acceptable Use", body:
-            "You agree not to:\n\n" +
-            "• Send phone numbers, external contact handles, or images/photos through in-app messages (the app automatically blocks these to keep the early conversation focused, and repeated attempts to bypass this may result in suspension)\n" +
+            "Enigo has no tolerance for objectionable content or abusive users. You agree not to:\n\n" +
+            "• Send phone numbers or external contact handles through in-app messages (the app automatically blocks these to keep the early conversation focused, and repeated attempts to bypass this may result in suspension)\n" +
+            "• Send a photo in a conversation before the photo stage has unlocked for both of you (the app enforces this)\n" +
             "• Harass, threaten, or send unwanted sexual content to another user\n" +
             "• Use the app for any commercial solicitation, scam, or fraud\n" +
             "• Misrepresent your age, identity, or intentions\n\n" +
-            "Violations may result in warnings, suspension, or permanent account termination, and are reportable in-app."),
+            "Every report is read by a person. Reporting a conversation ends it immediately and you will not be paired with that user again. Violations may result in warnings, suspension, or permanent account termination."),
         LegalSection(heading: "Content You Share", body:
             "You retain ownership of the photos, bio, and messages you provide. You grant Enigo a limited license to store, transmit, and display that content solely to operate the matching and messaging features of the app for you and your matches."),
         LegalSection(heading: "Subscriptions & Purchases", body:
