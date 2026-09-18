@@ -12,7 +12,7 @@ struct PhoneView: View {
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 
-            TextField("(720) 980-1520", text: $appState.phoneNumber)
+            TextField("(555) 555-0123", text: $appState.phoneNumber)
                 .keyboardType(.phonePad)
                 .textContentType(.telephoneNumber)
                 .font(EnigoFont.answerOption)

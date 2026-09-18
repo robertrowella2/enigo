@@ -138,7 +138,7 @@ final class AppState: ObservableObject {
     /// backend/supabase/config.toml).
     ///
     /// The country code is the part people leave off: almost everyone types
-    /// their own number the way they'd say it out loud ("720 980 1520"),
+    /// their own number the way they'd say it out loud ("555 555 0123"),
     /// and forwarding those ten digits to Twilio unqualified gets the send
     /// rejected. So a bare NANP-length number is assumed to be +1. An
     /// explicit leading '+' means the user gave a country code themselves,
