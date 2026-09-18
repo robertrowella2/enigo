@@ -36,15 +36,18 @@ export default {
       return Response.json({ message: "Invalid GIF source", code: "invalid_gif" }, { status: 400 });
     }
 
+    // Photo messages are off for 1.0. The shipping app has no way to send
+    // one (the composer is text and GIFs), so this only closes the door to
+    // a modified client. Photos in a conversation have no moderation, and
+    // the product as described — "no photos until graduation" — means the
+    // profile photo revealed by get-match-state, not pictures in chat.
+    // The unlock-gated version this replaces is in git history for 1.1,
+    // to return with moderation in front of it.
     if (photo) {
-      const { data: unlocks } = await admin.from("unlocks").select("field").eq("match_id", matchId);
-      const hasPhotoAccess = unlocks?.some((u: { field: string }) => u.field === "photo") ?? false;
-      if (!hasPhotoAccess) {
-        return Response.json(
-          { message: "Photo sharing not yet unlocked", code: "photo_locked" },
-          { status: 403 },
-        );
-      }
+      return Response.json(
+        { message: "Photos can't be sent in conversations yet", code: "photo_messages_disabled" },
+        { status: 403 },
+      );
     }
 
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

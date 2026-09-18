@@ -49,7 +49,7 @@ enum LegalContent {
         LegalSection(heading: "Acceptable Use", body:
             "Enigo has no tolerance for objectionable content or abusive users. You agree not to:\n\n" +
             "• Send phone numbers or external contact handles through in-app messages (the app automatically blocks these to keep the early conversation focused, and repeated attempts to bypass this may result in suspension)\n" +
-            "• Send a photo in a conversation before the photo stage has unlocked for both of you (the app enforces this)\n" +
+            "• Send photos in a conversation (not currently possible — the only photo anyone sees is your profile photo, once that stage has unlocked for both of you)\n" +
             "• Harass, threaten, or send unwanted sexual content to another user\n" +
             "• Use the app for any commercial solicitation, scam, or fraud\n" +
             "• Misrepresent your age, identity, or intentions\n\n" +
