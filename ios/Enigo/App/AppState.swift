@@ -2,6 +2,8 @@ import CoreLocation
 import Foundation
 import Supabase
 import SwiftUI
+import UIKit
+import UserNotifications
 
 enum Step: Equatable {
     case ageVerification
@@ -118,6 +120,7 @@ final class AppState: ObservableObject {
         if (try? await backend.fetchOwnProfile()) != nil {
             openDashboard()
         }
+        await registerForPushIfAuthorized()
     }
 
     // MARK: - Onboarding navigation
@@ -172,6 +175,7 @@ final class AppState: ObservableObject {
             // re-running onboarding and overwriting their existing profile.
             if (try? await self.backend.fetchOwnProfile()) != nil {
                 self.openDashboard()
+                await self.registerForPushIfAuthorized()
             } else {
                 self.step = .name
             }
@@ -267,7 +271,24 @@ final class AppState: ObservableObject {
             try await self.backend.upsertProfile(profile)
             self.step = .searching
             self.beginSearching()
+            // The permission screen asked for the APNs token a step ago, and
+            // the backend used to refuse it until the profile existed — see
+            // registerForPushIfAuthorized.
+            await self.registerForPushIfAuthorized()
         }
+    }
+
+    /// Asks iOS for the APNs token again if the user has already granted
+    /// notifications. Cheap, and Apple's guidance is to do it on every launch
+    /// because tokens rotate. It also closes the hole that left production
+    /// with zero device tokens: onboarding requested the token one step
+    /// before the profile was written, the backend rejected it (a foreign
+    /// key to profiles), the AppDelegate swallowed the error, and nothing
+    /// ever asked again. The token lands in AppDelegate as before.
+    func registerForPushIfAuthorized() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        guard settings.authorizationStatus == .authorized else { return }
+        UIApplication.shared.registerForRemoteNotifications()
     }
 
     // MARK: - Matching
@@ -472,6 +493,7 @@ final class AppState: ObservableObject {
             // a returning account, not a half-finished signup to resume.
             if (try? await self.backend.fetchOwnProfile()) != nil {
                 self.openDashboard()
+                await self.registerForPushIfAuthorized()
             } else {
                 self.step = .name
             }
