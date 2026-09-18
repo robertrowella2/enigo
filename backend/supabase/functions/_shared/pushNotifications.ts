@@ -65,8 +65,12 @@ async function sendApns(token: string, title: string, body: string): Promise<voi
   // App Store or TestFlight release) registers a sandbox-only token, which
   // production APNs rejects with "BadEnvironmentKeyInToken". Same
   // prod-then-sandbox fallback shape as verifyAppleTransaction.
+  // APNs answers BadEnvironmentKeyInToken with a 403, not a 400 — checked
+  // by sending a sandbox token to api.push.apple.com directly. This used
+  // to test for 400 only, so the fallback never ran and no development-
+  // signed device ever received a push.
   let res = await send("api.push.apple.com");
-  if (res.status === 400) {
+  if (res.status === 400 || res.status === 403) {
     const failure = await res.clone().json().catch(() => null);
     if (failure?.reason === "BadEnvironmentKeyInToken") {
       res = await send("api.sandbox.push.apple.com");
