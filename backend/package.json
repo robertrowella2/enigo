@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:smoke": "node test/smoke.mjs"
+    "test:smoke": "node test/smoke.mjs",
+    "review:reset": "npx supabase db query --linked \"select review_fixture_reset()\""
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2"

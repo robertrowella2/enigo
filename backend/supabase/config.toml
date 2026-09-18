@@ -275,8 +275,16 @@ max_frequency = "5s"
 # demo-account credential, and intentionally live in this file. Pushed to
 # the cloud project on purpose; do not remove without checking whether
 # review is still relying on it.
+#
+# Two numbers, because a reviewer needs to see two different things and
+# one account can't show both: an account that already finished
+# onboarding skips it (AppState.submitVerify). 0100 is seeded by
+# review_fixture_reset() with a person-to-person correspondence already
+# in progress; 0101 is kept profile-less so it runs onboarding in full.
+# Same code for both so the review notes stay simple.
 [auth.sms.test_otp]
 "15555550100" = "123456"
+"15555550101" = "123456"
 
 # Configure logged in session timeouts.
 # [auth.sessions]
