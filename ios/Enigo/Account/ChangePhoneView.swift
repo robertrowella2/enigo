@@ -29,7 +29,7 @@ struct ChangePhoneView: View {
 
     private var numberStep: some View {
         Group {
-            Text("Your matches, messages and subscription stay exactly as they are — only the number you sign in with changes.")
+            Text("Your pen pals, messages and subscription stay exactly as they are — only the number you sign in with changes.")
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 

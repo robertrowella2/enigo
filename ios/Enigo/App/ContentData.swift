@@ -37,8 +37,8 @@ enum ContentData {
     ]
 
     static let introSlides: [(art: String, title: String, body: String, cta: String)] = [
-        ("NO FACES", "No photos. No swiping.", "You match on how you answer, not how you look. A photo is the very last thing that unlocks.", "Go on"),
-        ("ELEVEN ANSWERS", "Matched on answers, not faces.", "Eleven short questions about values, conflict, and rhythm decide who you meet — not a browse.", "Go on"),
+        ("NO FACES", "No photos. No swiping.", "You're paired by how you answer, not how you look. A photo is the very last thing that unlocks.", "Go on"),
+        ("ELEVEN ANSWERS", "Paired on answers, not faces.", "Eleven short questions about values, conflict, and rhythm decide who you meet — not a browse.", "Go on"),
         ("SEALED ENVELOPE", "Things unlock as you show up.", "Interests, then a bio, then a rough location — and eventually, a photo. Both of you have to be here for it.", "Go on"),
         ("SLOW LIGHT", "It's slow on purpose.", "Enigo is built for people who'd rather wait for someone real than swipe past a hundred maybes.", "Create an account"),
     ]

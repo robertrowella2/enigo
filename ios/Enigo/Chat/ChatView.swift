@@ -28,7 +28,7 @@ struct ChatView: View {
                         // first screen of the conversation — the header badge
                         // alone is easy to read past.
                         if vm.matchState?.isAiMatch == true {
-                            Text("While you wait for a real match, this is an AI persona chosen to be close to what you're looking for. It is not a person. When someone real is available, they take this slot.")
+                            Text("While you wait for a real pen pal, this is an AI persona chosen to be close to what you're looking for. It is not a person. When someone real is available, they take this slot.")
                                 .font(EnigoFont.meta)
                                 .foregroundStyle(EnigoColor.body(scheme))
                                 .padding(14)

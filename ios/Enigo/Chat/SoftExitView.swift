@@ -20,7 +20,7 @@ struct SoftExitView: View {
             FlowChips(reasons: reasons, selected: reason) { reason = $0 }
 
             if let remaining = appState.rematchCreditsRemaining {
-                Text(appState.rematchUnlimited ? "Unlimited fresh starts with Pro." : "\(remaining) free rematches remaining.")
+                Text(appState.rematchUnlimited ? "Unlimited fresh starts with Pro." : "\(remaining) free fresh starts remaining.")
                     .font(EnigoFont.meta)
                     .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
             }

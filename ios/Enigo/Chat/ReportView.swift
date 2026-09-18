@@ -20,7 +20,7 @@ struct ReportView: View {
     var body: some View {
         EnigoScreen {
             ScreenTitle(text: "Report")
-            Text("Reporting ends this match immediately. A human reads every report.")
+            Text("Reporting ends this conversation immediately. A human reads every report.")
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 

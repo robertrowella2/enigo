@@ -69,7 +69,10 @@ final class AppState: ObservableObject {
     @Published var community: String?
     @Published var locationGranted = false
     @Published var locationCoordinate: CLLocationCoordinate2D?
-    @Published var radiusKm: Int? = 50
+    /// nil = anywhere. Distance is opt-in: pen pals are usually far apart,
+    /// and ranking by proximity is what a dating app does. Someone who wants
+    /// it nearby picks a radius here or later in Settings.
+    @Published var radiusKm: Int? = nil
     @Published var intent: String?
     @Published var answers: [Int: Int] = [:]
 

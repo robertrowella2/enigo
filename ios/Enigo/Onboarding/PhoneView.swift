@@ -8,7 +8,7 @@ struct PhoneView: View {
         EnigoScreen {
             Eyebrow(text: "Step 1")
             ScreenTitle(text: "What's your number?")
-            Text("Used to sign in and to confirm you're 18+. It's never shown to a match.")
+            Text("Used to sign in and to confirm you're 18+. It's never shown to a pen pal.")
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 

@@ -29,7 +29,7 @@ struct PaywallView: View {
     /// so none is claimed — the subscription cannot be bought in that state
     /// anyway, and a stale number is worse than no number.
     private var proDescription: String {
-        let features = "three conversations at once, unlimited fresh starts, and shared-interest matching."
+        let features = "three conversations at once, unlimited fresh starts, and shared-interest pairing."
         guard let price = products.first(where: { $0.id == StoreProductID.proMonthly })?.displayPrice else {
             return features.prefix(1).uppercased() + features.dropFirst()
         }
@@ -71,7 +71,7 @@ struct PaywallView: View {
             Spacer(minLength: 20)
 
             VStack(alignment: .leading, spacing: 8) {
-                Eyebrow(text: "Out of free rematches?")
+                Eyebrow(text: "Out of free fresh starts?")
                 if let boostProduct = products.first(where: { $0.id == StoreProductID.boost }) {
                     PrimaryButton(title: "One-time boost — \(boostProduct.displayPrice)", isLoading: appState.isBusy) {
                         Task { await purchaseBoost(boostProduct) }

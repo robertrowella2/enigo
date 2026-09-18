@@ -42,9 +42,9 @@ enum LegalContent {
             "You must be at least 18 years old to use Enigo. By using the app you represent that you are 18 or older and have the legal capacity to enter into these Terms."),
         LegalSection(heading: "Your Account", body:
             "You're responsible for the accuracy of the information you provide and for keeping your account secure. You may not create more than one account, impersonate another person, or use a photo that isn't genuinely of you."),
-        LegalSection(heading: "How Matching Works, Including AI-Assisted Conversations", body:
-            "Enigo pairs you with one match at a time and reveals more about them gradually, as your conversation progresses. Two important things to know:\n\n" +
-            "Automatic upgrades — if you're placed with a match and a better or more compatible real person becomes available, Enigo may end that match and connect you with the new one automatically.\n\n" +
+        LegalSection(heading: "How Pairing Works, Including AI-Assisted Conversations", body:
+            "Enigo pairs you with one pen pal at a time and reveals more about them gradually, as your conversation progresses. Two important things to know:\n\n" +
+            "Automatic upgrades — if you're placed with a pen pal and a better or more compatible real person becomes available, Enigo may end that match and connect you with the new one automatically.\n\n" +
             "AI conversational partner — when no compatible real person is available yet, Enigo may temporarily connect you with an AI-generated conversational partner rather than leave you with nothing to do. This partner is not a real person — it is software designed to hold a conversation in a similar style to how a real match would. Enigo automatically ends this AI-assisted match and replaces it with a real person as soon as one becomes available, at no cost to you and without losing your progress toward that match's unlocks. You can turn off AI-assisted matching in Settings."),
         LegalSection(heading: "Acceptable Use", body:
             "You agree not to:\n\n" +
@@ -63,9 +63,9 @@ enum LegalContent {
             "To the fullest extent permitted by law, Enigo and its operators are not responsible or liable for the conduct of any user, on or off the app, and are not liable for any injury, loss, or damage of any kind — including personal injury, death, or property loss — arising from your interactions with other users or from meeting in person, including if someone's identity, statements, or conduct turns out to be different from what they represented in the app.\n\n" +
             "Report any user who makes you feel unsafe, and contact local law enforcement immediately if you are ever in danger."),
         LegalSection(heading: "Termination", body:
-            "You may delete your account at any time from Settings, which permanently removes your profile, matches, and message history. We may suspend or terminate your account for violating these Terms or applicable law."),
+            "You may delete your account at any time from Settings, which permanently removes your profile, pen pals, and message history. We may suspend or terminate your account for violating these Terms or applicable law."),
         LegalSection(heading: "Disclaimers", body:
-            "The app is provided \u{201c}as is.\u{201d} Enigo does not guarantee you will find a match, that any match will meet your expectations, or that the app will be uninterrupted or error-free."),
+            "The app is provided \u{201c}as is.\u{201d} Enigo does not guarantee you will find a pen pal, that any pen pal will meet your expectations, or that the app will be uninterrupted or error-free."),
         LegalSection(heading: "Limitation of Liability", body:
             "To the fullest extent permitted by law, Enigo and its operators are not liable for any indirect, incidental, special, or consequential damages, or for any injury, death, or loss of any kind, arising from your use of the app — including your interactions with other users, any in-person meeting arranged through the app, or the AI-assisted matching feature described above. This applies whether the claim is based on warranty, contract, tort (including negligence), or any other legal theory, and whether or not Enigo has been advised of the possibility of such damages."),
         LegalSection(heading: "Governing Law", body:
@@ -79,20 +79,20 @@ enum LegalContent {
     static let privacySections: [LegalSection] = [
         LegalSection(heading: "Information We Collect", body:
             "Phone number — used to sign in and verify you're a real person, via our SMS provider (Twilio).\n\n" +
-            "Profile information — the photo, bio, interests, gender, matching preferences, and question answers you provide.\n\n" +
-            "Approximate location — used only to find matches near you and show distance; stored as coordinates you control via Settings and can be removed by disabling location.\n\n" +
-            "Messages — stored so your conversation history is available to you and your match, and scanned automatically (not by a human reviewer under normal operation) to block phone numbers and images before they're sent, and to detect content that violates our Acceptable Use policy.\n\n" +
+            "Profile information — the photo, bio, interests, gender, pairing preferences, and question answers you provide.\n\n" +
+            "Approximate location — used only to find pen pals near you and show distance, if you choose to set a distance; stored as coordinates you control via Settings and can be removed by disabling location.\n\n" +
+            "Messages — stored so your conversation history is available to you and your pen pal, and scanned automatically (not by a human reviewer under normal operation) to block phone numbers and images before they're sent, and to detect content that violates our Acceptable Use policy.\n\n" +
             "Purchase records — subscription and boost status, verified against Apple's servers.\n\n" +
             "Device push token — used only to deliver notifications you've opted into (new messages, unlocks); never sold or used for advertising."),
         LegalSection(heading: "How We Use It", body:
-            "To operate matching, messaging, notifications, and billing; to enforce our Terms of Service and keep the community safe; and to improve the app. We do not sell your personal information."),
+            "To operate pairing, messaging, notifications, and billing; to enforce our Terms of Service and keep the community safe; and to improve the app. We do not sell your personal information."),
         LegalSection(heading: "Third-Party Services We Use", body:
             "Twilio — delivers SMS verification codes.\n\n" +
             "Anthropic (Claude) — powers the AI-assisted conversational partner described in the Terms of Service; message content sent to an AI-assisted match is processed by Anthropic's API to generate replies.\n\n" +
             "Apple — processes in-app purchases.\n\n" +
             "Supabase — our backend hosting provider; stores app data on our behalf under its own security commitments."),
         LegalSection(heading: "Data Retention", body:
-            "We retain your data for as long as your account is active. If you delete your account, your profile, matches, and messages are permanently removed from our systems."),
+            "We retain your data for as long as your account is active. If you delete your account, your profile, pen pals, and messages are permanently removed from our systems."),
         LegalSection(heading: "Your Rights", body:
             "You can export a copy of your data or permanently delete your account at any time from Settings \u{2192} Account. If you're in a jurisdiction with additional data rights (e.g. GDPR, CCPA), you may also have the right to correct or restrict our use of your data — contact us to exercise these."),
         LegalSection(heading: "Children's Privacy", body:

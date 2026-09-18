@@ -17,7 +17,7 @@ struct DeleteAccountConfirmView: View {
                 Spacer()
             }
             ScreenTitle(text: "Delete account")
-            Text("This is permanent. Your matches will see the conversation close without a reason — no notification, no explanation.")
+            Text("This is permanent. Your pen pals will see the conversation close without a reason — no notification, no explanation.")
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.danger(scheme))
 

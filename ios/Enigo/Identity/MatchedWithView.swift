@@ -43,8 +43,8 @@ struct MatchedWithView: View {
     @EnvironmentObject private var appState: AppState
     var body: some View {
         GenderMultiSelect(
-            title: "Matched with (1 of 3)",
-            subtitle: "Who would you like Enigo to match you with?",
+            title: "Pair me with (1 of 3)",
+            subtitle: "Who would you like Enigo to pair you with?",
             selection: $appState.matchWith,
             onContinue: { appState.submitMatchedWith() }
         )

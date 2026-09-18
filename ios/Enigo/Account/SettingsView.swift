@@ -2,18 +2,17 @@ import SwiftUI
 import UIKit
 import UserNotifications
 
-/// Settings — Identity, Matching (LGBTQ+ preference, location, radius,
-/// "Order: closest first"), Notifications (messages/unlocks, everything
-/// else off always), Account.
+/// Settings — Pairing (who, community, optional distance), Notifications
+/// (messages/unlocks, everything else off always), Account, Legal.
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var scheme
-    private let radii = [25, 50, 100]
+    private let radii: [Int?] = [nil, 25, 50, 100]
     private let genderOptions = [
         ("men", "Men"), ("women", "Women"), ("nonbinary", "Nonbinary"), ("anyone", "Anyone"),
     ]
     private let communityOptions = [
-        ("in_community", "Match me inside the community"),
+        ("in_community", "Pair me inside the community"),
         ("open", "It matters but I'm open either way"),
         ("not_looking", "Not what I'm looking for"),
         ("rather_not_say", "Rather not say"),
@@ -31,12 +30,12 @@ struct SettingsView: View {
             ScreenTitle(text: "Settings")
 
             if let profile = appState.ownProfile {
-                section("MATCHING") {
+                section("PAIRING") {
                     // These were set once during onboarding and then had no
                     // way to change. Someone who picked narrowly, or changed
                     // their mind, got no matches for as long as nobody fit —
                     // and the searching screen is where they were left.
-                    Text("Match me with").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                    Text("Pair me with").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
                     HStack(spacing: 8) {
                         ForEach(genderOptions, id: \.0) { value, label in
                             SelectableChip(text: label, selected: profile.matchWith.contains(value)) {
@@ -58,11 +57,15 @@ struct SettingsView: View {
                             Task { await appState.patchProfile(ProfilePatch(community: value)) }
                         }
                     }
-                    Text("Order: closest first").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
+                    // Distance is a preference, not the default. The label
+                    // used to read "Order: closest first" with no way to turn
+                    // it off — proximity ranking for everyone, whether they
+                    // wanted it or not.
+                    Text("Distance").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
                     HStack(spacing: 8) {
                         ForEach(radii, id: \.self) { radius in
-                            SelectableChip(text: "\(radius) km", selected: profile.radiusKm == radius) {
-                                Task { await appState.patchProfile(ProfilePatch(radiusKm: radius)) }
+                            SelectableChip(text: radius.map { "\($0) km" } ?? "Anywhere", selected: profile.radiusKm == radius) {
+                                Task { await appState.patchProfile(ProfilePatch(radiusKm: radius, clearRadius: radius == nil)) }
                             }
                         }
                     }
@@ -72,7 +75,7 @@ struct SettingsView: View {
                     Toggle(isOn: Binding(
                         get: { profile.notifyMatches },
                         set: { v in Task { await appState.patchProfile(ProfilePatch(notifyMatches: v)) } }
-                    )) { Text("New matches").font(EnigoFont.body) }
+                    )) { Text("New pen pals").font(EnigoFont.body) }
                     Toggle(isOn: Binding(
                         get: { profile.notifyMessages },
                         set: { v in Task { await appState.patchProfile(ProfilePatch(notifyMessages: v)) } }

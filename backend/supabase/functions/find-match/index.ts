@@ -20,7 +20,7 @@ type AdminClient = any;
 async function notifyMatched(admin: AdminClient, userId: string): Promise<void> {
   const { data: profile } = await admin.from("profiles").select("notify_matches, is_ai").eq("id", userId).single();
   if (!profile || profile.is_ai || !profile.notify_matches) return;
-  await sendPushToUser(admin, userId, "New match", "Someone new is here. Say hello.");
+  await sendPushToUser(admin, userId, "Someone to write to", "Your new pen pal is here. Say hello.");
 }
 
 /** First candidate (already ranked by score/distance) that isn't already at

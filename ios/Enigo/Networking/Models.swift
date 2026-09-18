@@ -115,10 +115,38 @@ struct ProfilePatch: Encodable {
     var shownTo: [String]?
     var community: String?
     var radiusKm: Int?
+    /// A nil `radiusKm` means "leave it alone", like every other field here
+    /// — the synthesized encoder drops nil keys, so it can't express
+    /// "set it to null". This is that: sends an explicit null so a radius
+    /// can be cleared back to Anywhere.
+    var clearRadius = false
     var locationGranted: Bool?
     var notifyMessages: Bool?
     var notifyUnlocks: Bool?
     var notifyMatches: Bool?
+
+    private enum CodingKeys: String, CodingKey {
+        case showFirstName, firstName, matchWith, shownTo, community, radiusKm
+        case locationGranted, notifyMessages, notifyUnlocks, notifyMatches
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encodeIfPresent(showFirstName, forKey: .showFirstName)
+        try c.encodeIfPresent(firstName, forKey: .firstName)
+        try c.encodeIfPresent(matchWith, forKey: .matchWith)
+        try c.encodeIfPresent(shownTo, forKey: .shownTo)
+        try c.encodeIfPresent(community, forKey: .community)
+        if clearRadius {
+            try c.encodeNil(forKey: .radiusKm)
+        } else {
+            try c.encodeIfPresent(radiusKm, forKey: .radiusKm)
+        }
+        try c.encodeIfPresent(locationGranted, forKey: .locationGranted)
+        try c.encodeIfPresent(notifyMessages, forKey: .notifyMessages)
+        try c.encodeIfPresent(notifyUnlocks, forKey: .notifyUnlocks)
+        try c.encodeIfPresent(notifyMatches, forKey: .notifyMatches)
+    }
 }
 
 /// The five "Known" sheet fields, in fixed unlock order.

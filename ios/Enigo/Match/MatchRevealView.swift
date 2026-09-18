@@ -35,7 +35,12 @@ struct MatchRevealView: View {
                 Eyebrow(text: "Why you two")
                 Text("You answered the eleven questions closely enough to matter.")
                     .font(EnigoFont.body)
-                Text("She's the closest strong match inside your radius.")
+                // This line used to read "She's the closest strong match
+                // inside your radius" — gendered, and untrue for anyone
+                // without a radius, which is now everyone by default.
+                Text(appState.ownProfile?.radiusKm != nil
+                     ? "And they're within the distance you set."
+                     : "Distance didn't come into it. They could be anywhere.")
                     .font(EnigoFont.meta)
                     .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
             }
@@ -49,6 +54,7 @@ struct MatchRevealView: View {
                 .frame(maxWidth: .infinity, alignment: .center)
         }
         .task {
+            if appState.ownProfile == nil { await appState.loadOwnProfile() }
             if let matchId = appState.revealedMatchId,
                let state = try? await Backend.shared.getMatchState(matchId: matchId) {
                 partnerUsername = state.partnerUsername

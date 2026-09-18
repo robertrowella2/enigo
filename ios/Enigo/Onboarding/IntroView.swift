@@ -31,7 +31,12 @@ struct IntroView: View {
             PrimaryButton(title: slide.cta) { appState.advanceIntro() }
 
             if slideIndex == 0 {
-                SecondaryLink(title: "I already have an account") {}
+                // Straight to sign-in, past the three remaining intro slides.
+                // Verifying a number that already has a profile lands on the
+                // dashboard (AppState.submitVerify), and the phone step offers
+                // email sign-in for a lost number — so this is the whole
+                // returning-user path. The action was empty until now.
+                SecondaryLink(title: "I already have an account") { appState.step = .phone }
                     .frame(maxWidth: .infinity, alignment: .center)
             }
         }

@@ -14,7 +14,7 @@ struct NameView: View {
         EnigoScreen {
             Eyebrow(text: "Your name")
             ScreenTitle(text: "What's your name?")
-            Text("Your first name can be shared with a match later, if you choose to. Your last name is never shown to anyone — we just keep it out of your username and out of chat.")
+            Text("Your first name can be shared with a pen pal later, if you choose to. Your last name is never shown to anyone — we just keep it out of your username and out of chat.")
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 
@@ -24,7 +24,7 @@ struct NameView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Username").font(EnigoFont.meta).foregroundStyle(EnigoColor.fgAlpha(scheme, 0.5))
                 field("Username", text: $appState.username, onChange: { _ in appState.usernameError = nil })
-                Text("This is what a match sees — no real names here.")
+                Text("This is what a pen pal sees — no real names here.")
                     .font(EnigoFont.meta)
                     .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.45))
                 if let error = appState.usernameError {

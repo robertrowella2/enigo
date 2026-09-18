@@ -39,7 +39,7 @@ struct SearchingView: View {
                 withAnimation(EnigoMotion.breathe) { breathing = true }
             }
 
-            Text("Looking for one good match")
+            Text("Looking for one good pen pal")
                 .font(EnigoFont.screenTitle)
                 .foregroundStyle(EnigoColor.dominant(scheme))
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -53,7 +53,7 @@ struct SearchingView: View {
             // Waiting a long time usually means the preferences are too
             // narrow for who is currently around, and that is exactly when
             // someone needs to be able to reach them.
-            SecondaryLink(title: "Adjust your matching settings") {
+            SecondaryLink(title: "Adjust your pairing settings") {
                 appState.openSettings()
             }
             .frame(maxWidth: .infinity, alignment: .center)

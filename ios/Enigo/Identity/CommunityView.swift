@@ -5,9 +5,9 @@ struct CommunityView: View {
     @Environment(\.colorScheme) private var scheme
 
     private let options: [(String, String, String)] = [
-        ("in_community", "Match me inside the community", "A filter: you'll only be matched with others who chose this too."),
-        ("open", "It matters but I'm open either way", "A lean: it can nudge a match, never a hard rule."),
-        ("not_looking", "Not what I'm looking for", "A filter: you won't be matched into that pool."),
+        ("in_community", "Pair me inside the community", "A filter: you'll only be paired with others who chose this too."),
+        ("open", "It matters but I'm open either way", "A lean: it can nudge a pairing, never a hard rule."),
+        ("not_looking", "Not what I'm looking for", "A filter: you won't be paired into that pool."),
         ("rather_not_say", "Rather not say", "No effect at all — this is never shown on a profile."),
     ]
 

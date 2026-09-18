@@ -23,7 +23,7 @@ struct SignInHelpView: View {
             // to sign up" — Enigo never asks for an email, so that pointed at
             // an account that does not exist. Changing the number in advance
             // is the only recovery that actually works.
-            Text("Getting a new number? Change it in Settings **before** you lose the old one — your matches, messages and subscription all move with you.")
+            Text("Getting a new number? Change it in Settings **before** you lose the old one — your pen pals, messages and subscription all move with you.")
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 

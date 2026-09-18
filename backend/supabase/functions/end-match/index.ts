@@ -33,7 +33,7 @@ export default {
 
     if (!pro && profile.rematch_credits <= 0) {
       return Response.json(
-        { message: "No free rematches remaining", code: "no_rematches" },
+        { message: "No free fresh starts remaining", code: "no_rematches" },
         { status: 402 },
       );
     }

@@ -29,7 +29,7 @@ struct RecoveryEmailView: View {
 
     private var addressStep: some View {
         Group {
-            Text("If you lose your phone number, this is how you get back in. It's only ever used to sign in — never shown to a match, never used to contact you.")
+            Text("If you lose your phone number, this is how you get back in. It's only ever used to sign in — never shown to a pen pal, never used to contact you.")
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 

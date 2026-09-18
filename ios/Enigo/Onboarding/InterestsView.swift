@@ -31,7 +31,7 @@ struct InterestsView: View {
         EnigoScreen {
             Eyebrow(text: "Step 2 of 3")
             ScreenTitle(text: "What do you like?")
-            Text("Pick at least three — more if you like. These unlock first, so they're the first real thing your match learns about you.")
+            Text("Pick at least three — more if you like. These unlock first, so they're the first real thing your pen pal learns about you.")
                 .font(EnigoFont.body)
                 .foregroundStyle(EnigoColor.fgAlpha(scheme, 0.62))
 
