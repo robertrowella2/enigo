@@ -15,7 +15,9 @@ struct EnigoScreen<Content: View>: View {
             .padding(.horizontal, EnigoSpacing.screenHorizontal)
             .padding(.top, topPadding)
             .padding(.bottom, 40)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // Capped column, centred — see EnigoSpacing.readableWidth.
+            .frame(maxWidth: EnigoSpacing.readableWidth, alignment: .leading)
+            .frame(maxWidth: .infinity)
         }
         .background(EnigoColor.background(scheme).ignoresSafeArea())
         // Scrolled content otherwise slides under the clock and battery with

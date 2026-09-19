@@ -63,6 +63,8 @@ struct ChatView: View {
                     }
                     .padding(.horizontal, EnigoSpacing.listHorizontal)
                     .padding(.top, 16)
+                    .frame(maxWidth: EnigoSpacing.readableWidth)
+                    .frame(maxWidth: .infinity)
                 }
                 .onChange(of: vm.messages.count) { _, _ in
                     if let last = vm.messages.last {
@@ -167,6 +169,8 @@ struct ChatView: View {
         .padding(.horizontal, EnigoSpacing.listHorizontal)
         .padding(.top, 58)
         .padding(.bottom, 12)
+        .frame(maxWidth: EnigoSpacing.readableWidth)
+        .frame(maxWidth: .infinity)
         .background(EnigoColor.sheetBase(scheme))
     }
 
@@ -203,6 +207,8 @@ struct ChatView: View {
             .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty || vm.isSending)
         }
         .padding(EnigoSpacing.listHorizontal)
+        .frame(maxWidth: EnigoSpacing.readableWidth)
+        .frame(maxWidth: .infinity)
     }
 }
 

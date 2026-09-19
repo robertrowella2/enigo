@@ -128,6 +128,14 @@ enum EnigoSpacing {
     static let listHorizontal: CGFloat = 22
     static let stackGap: CGFloat = 20
     static let tightGap: CGFloat = 9
+    /// Widest a column of content is allowed to grow, padding included.
+    /// Every screen laid out to the width of the display, which on any
+    /// iPhone so far has been narrower than this — so nothing changes
+    /// there. On a wide display (iPhone Duo open, iPad-class widths) it
+    /// keeps a line of body text at a readable length and a button at a
+    /// tappable width instead of stretching both edge to edge; the column
+    /// sits centred in whatever space is left.
+    static let readableWidth: CGFloat = 600
 }
 
 enum EnigoMotion {
