@@ -21,7 +21,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Enigo ranks matches by distance and reveals a rough area once you and your match have both shown up. Your exact location is never shared.</string>
+	<string>Optional. Enigo only uses this if you choose a distance for your pen pals, and to reveal a rough area once you have both shown up. Your exact location is never shared.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose a photo to have ready for graduation — it stays hidden until then.</string>
 	<key>NSUserNotificationsUsageDescription</key>
@@ -35,6 +35,8 @@
 	<dict>
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
+		<key>UIImageName</key>
+		<string>LaunchMark</string>
 	</dict>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

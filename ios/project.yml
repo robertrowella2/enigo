@@ -43,7 +43,7 @@ targets:
         UIAppFonts:
           - Fraunces.ttf
           - Inter.ttf
-        NSLocationWhenInUseUsageDescription: "Enigo ranks matches by distance and reveals a rough area once you and your match have both shown up. Your exact location is never shared."
+        NSLocationWhenInUseUsageDescription: "Optional. Enigo only uses this if you choose a distance for your pen pals, and to reveal a rough area once you have both shown up. Your exact location is never shared."
         NSPhotoLibraryUsageDescription: "Choose a photo to have ready for graduation — it stays hidden until then."
         NSUserNotificationsUsageDescription: "Enigo lets you know about new messages and unlock moments only."
         UISupportedInterfaceOrientations:
