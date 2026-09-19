@@ -3,6 +3,7 @@ import SwiftUI
 struct IntroView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     let slideIndex: Int
 
     var body: some View {
@@ -11,7 +12,9 @@ struct IntroView: View {
             Spacer(minLength: 40)
             RoundedRectangle(cornerRadius: EnigoRadius.card)
                 .fill(EnigoColor.fgAlpha(scheme, 0.06))
-                .frame(height: 210)
+                // Half the display sideways at 210; the title and button
+                // belong above the fold more than the artwork does.
+                .frame(height: verticalSizeClass == .compact ? 120 : 210)
                 .overlay(IntroArtwork(kind: slide.art))
 
             Text(slide.title)
