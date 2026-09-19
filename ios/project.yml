@@ -33,8 +33,13 @@ targets:
         # asking on every single upload and holding the build in processing
         # until someone answers.
         ITSAppUsesNonExemptEncryption: false
+        # The system launch frame: background colour plus the eclipse mark,
+        # centred. LoadingView draws the identical mark in the identical
+        # place, so the hand-off from this static frame to the live app is
+        # invisible — the mark simply starts breathing.
         UILaunchScreen:
           UIColorName: LaunchBackground
+          UIImageName: LaunchMark
         UIAppFonts:
           - Fraunces.ttf
           - Inter.ttf

@@ -7,7 +7,12 @@ struct DashboardView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var scheme
     @State private var rows: [MatchStateResponse] = []
-    @State private var isLoadingRows = false
+    /// Starts true: the empty-state line is meant to be hidden until the
+    /// first load has finished, but this began false and only became true
+    /// once loadRows() ran — after three other awaits in the task below —
+    /// so "No active connections yet" flashed on every launch for someone
+    /// who has one.
+    @State private var isLoadingRows = true
 
     var body: some View {
         EnigoScreen(topPadding: 70) {

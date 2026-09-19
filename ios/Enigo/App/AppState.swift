@@ -6,6 +6,7 @@ import UIKit
 import UserNotifications
 
 enum Step: Equatable {
+    case loading
     case ageVerification
     case introSlide(Int)
     case phone
@@ -46,7 +47,7 @@ enum Step: Equatable {
 /// same draft profile.
 @MainActor
 final class AppState: ObservableObject {
-    @Published var step: Step = .ageVerification
+    @Published var step: Step = .loading
     @Published var errorMessage: String?
     @Published var isBusy = false
     @Published var presentedLegalDocument: LegalDocument?
@@ -108,19 +109,25 @@ final class AppState: ObservableObject {
     private let backend = Backend.shared
     private var searchTask: Task<Void, Never>?
 
-    /// Called once at launch. If a session survived in the Keychain and the
-    /// account already finished onboarding, skip straight to the dashboard
-    /// instead of dumping a returning user back into onboarding.
+    /// Called once at launch, while LoadingView is up. Waits for the auth
+    /// client to say whether a session survived in the Keychain, then sends
+    /// a returning account to the dashboard and everyone else into
+    /// onboarding. Previously `step` began at `.ageVerification` and this
+    /// polled for a signed-in user for up to two seconds, so a returning
+    /// user watched the birthdate screen until the dashboard replaced it.
     func bootstrap() async {
-        for _ in 0..<10 {
-            if backend.userId != nil { break }
-            try? await Task.sleep(for: .milliseconds(200))
+        // The first auth event normally lands within a few milliseconds;
+        // the cap only matters if the auth client never reports at all.
+        for _ in 0..<30 {
+            if backend.sessionResolved { break }
+            try? await Task.sleep(for: .milliseconds(100))
         }
-        guard backend.userId != nil else { return }
-        if (try? await backend.fetchOwnProfile()) != nil {
+        if backend.userId != nil, (try? await backend.fetchOwnProfile()) != nil {
             openDashboard()
+            await registerForPushIfAuthorized()
+        } else if step == .loading {
+            step = .ageVerification
         }
-        await registerForPushIfAuthorized()
     }
 
     // MARK: - Onboarding navigation

@@ -51,12 +51,18 @@ final class Backend: ObservableObject {
     }
 
     @Published var userId: UUID?
+    /// True once the auth client has reported whether a session survived
+    /// in the Keychain — the first event on the stream, signed in or not.
+    /// Launch waits on this rather than on `userId`, which for someone
+    /// signed out would never arrive.
+    @Published var sessionResolved = false
 
     private init() {
         Task {
             for await (event, session) in client.auth.authStateChanges {
                 _ = event
                 userId = session?.user.id
+                sessionResolved = true
             }
         }
     }
