@@ -65,7 +65,9 @@ final class ScreenshotWalk: XCTestCase {
         for (orientation, suffix) in [(UIDeviceOrientation.portrait, "portrait"), (.landscapeLeft, "landscape")] {
             XCUIDevice.shared.orientation = orientation
             RunLoop.current.run(until: Date(timeIntervalSinceNow: 1.5))
-            let attachment = XCTAttachment(screenshot: app.screenshot())
+            let win = app.windows.firstMatch.frame
+            print("[walk] \(name)-\(suffix) device=\(XCUIDevice.shared.orientation.rawValue) window=\(Int(win.width))x\(Int(win.height))")
+            let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
             attachment.name = "\(name)-\(suffix)"
             attachment.lifetime = .keepAlways
             add(attachment)
