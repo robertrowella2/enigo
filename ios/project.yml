@@ -73,3 +73,24 @@ targets:
       # Lets the paywall's StoreKit 2 calls resolve products locally without
       # an App Store Connect account — see Enigo/Products.storekit.
       storeKitConfiguration: Enigo/Products.storekit
+      testTargets:
+        - EnigoUITests
+  # Screenshot walk for Xcode Cloud's iPhone Duo simulator — see
+  # EnigoUITests/ScreenshotWalk.swift. Not part of the archive.
+  EnigoUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: EnigoUITests
+    dependencies:
+      - target: Enigo
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.enigo.app.uitests
+        TEST_TARGET_NAME: Enigo
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        DEVELOPMENT_TEAM: "J4D83S2UGB"
+        CODE_SIGN_STYLE: Automatic
