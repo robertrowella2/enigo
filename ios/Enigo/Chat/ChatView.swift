@@ -4,6 +4,7 @@ struct ChatView: View {
     let matchId: UUID
     @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @StateObject private var vm = ChatViewModel()
     @State private var showGifPicker = false
     /// Owned by the view, not the view model: ChatViewModel republishes on
@@ -167,7 +168,7 @@ struct ChatView: View {
                 .foregroundStyle(EnigoColor.accent(scheme))
         }
         .padding(.horizontal, EnigoSpacing.listHorizontal)
-        .padding(.top, 58)
+        .padding(.top, verticalSizeClass == .compact ? 12 : 58)
         .padding(.bottom, 12)
         .frame(maxWidth: EnigoSpacing.readableWidth)
         .frame(maxWidth: .infinity)

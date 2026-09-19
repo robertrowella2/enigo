@@ -4,6 +4,7 @@ import SwiftUI
 /// per the "Top padding is platform-dependent" token (iOS values).
 struct EnigoScreen<Content: View>: View {
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     var topPadding: CGFloat = 76
     @ViewBuilder var content: Content
 
@@ -13,7 +14,11 @@ struct EnigoScreen<Content: View>: View {
                 content
             }
             .padding(.horizontal, EnigoSpacing.screenHorizontal)
-            .padding(.top, topPadding)
+            // The headroom under the status bar is generous in portrait
+            // and a fifth of the display in landscape, so it shrinks when
+            // height is compact rather than pushing the title below the
+            // fold of a sideways phone.
+            .padding(.top, verticalSizeClass == .compact ? 24 : topPadding)
             .padding(.bottom, 40)
             // Capped column, centred — see EnigoSpacing.readableWidth.
             .frame(maxWidth: EnigoSpacing.readableWidth, alignment: .leading)
