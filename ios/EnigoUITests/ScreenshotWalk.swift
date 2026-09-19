@@ -64,7 +64,7 @@ final class ScreenshotWalk: XCTestCase {
     private func snap(_ name: String) {
         for (orientation, suffix) in [(UIDeviceOrientation.portrait, "portrait"), (.landscapeLeft, "landscape")] {
             XCUIDevice.shared.orientation = orientation
-            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.6))
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 1.5))
             let attachment = XCTAttachment(screenshot: app.screenshot())
             attachment.name = "\(name)-\(suffix)"
             attachment.lifetime = .keepAlways
